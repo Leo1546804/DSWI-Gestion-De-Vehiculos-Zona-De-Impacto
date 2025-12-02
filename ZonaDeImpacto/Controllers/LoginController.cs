@@ -37,6 +37,11 @@ namespace ZonaDeImpacto.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
     }
 }
