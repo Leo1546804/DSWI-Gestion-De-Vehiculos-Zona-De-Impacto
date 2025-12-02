@@ -6,6 +6,7 @@ using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Controllers
 {
+    [ValidarAdmin]
     [ValidarSesion]
     public class UsuarioController : Controller
     {

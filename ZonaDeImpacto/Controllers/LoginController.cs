@@ -43,5 +43,11 @@ namespace ZonaDeImpacto.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
+
+        [HttpGet]
+        public IActionResult AccesoDenegado()
+        {
+            return View();
+        }
     }
 }
