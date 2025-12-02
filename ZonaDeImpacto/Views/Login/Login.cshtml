@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+}
+
+<h2>Iniciar Sesión</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label>Usuario</label>
+        <input name="usuario" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Contraseña</label>
+        <input name="password" type="password" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ingresar</button>
+
+    <span class="text-danger">@ViewBag.Error</span>
+</form>

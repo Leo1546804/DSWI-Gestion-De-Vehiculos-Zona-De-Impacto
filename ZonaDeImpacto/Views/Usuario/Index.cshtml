@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Usuario>
+
+<h2>Lista de Usuarios</h2>
+
+<p>
+    <a asp-action="Crear" class="btn btn-primary">+ Nuevo Usuario</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre Completo</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach(var usuario in Model)
+        {       
+        <tr>
+            <td>@usuario.idUsuario</td>
+            <td>@usuario.nombreCompleto</td>
+            <td>@usuario.usuario</td>
+            <td>@usuario.rol</td>
+            <td>@usuario.estado</td>
+            <td>
+               <a asp-action="Editar" asp-route-id="@usuario.idUsuario"class="btn btn-warning btn-sm">Editar</a>
+                <a asp-action="Eliminar" asp-route-id="@usuario.idUsuario" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este usuario?');">Eliminar</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
