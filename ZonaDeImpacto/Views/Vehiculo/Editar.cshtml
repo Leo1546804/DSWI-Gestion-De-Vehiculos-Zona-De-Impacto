@@ -1,0 +1,47 @@
+﻿@model ZonaDeImpacto.Models.Vehiculo
+
+<h2>Editar Vehículo</h2>
+
+<form asp-action="Editar" method="post">
+
+    <input type="hidden" asp-for="idVehiculo" />
+
+    <div class="mb-3">
+        <label class="form-label">Placa</label>
+        <input asp-for="placa" class="form-control" />
+        <span asp-validation-for="placa" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Marca</label>
+        <input asp-for="marca" class="form-control" />
+        <span asp-validation-for="marca" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Modelo</label>
+        <input asp-for="modelo" class="form-control" />
+        <span asp-validation-for="modelo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Año</label>
+        <input asp-for="anio" class="form-control" />
+        <span asp-validation-for="anio" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Kilometraje</label>
+        <input asp-for="kilometraje" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Estado</label>
+        <input asp-for="estado" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+
+</form>
+
