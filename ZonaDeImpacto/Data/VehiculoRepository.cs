@@ -133,35 +133,5 @@ namespace ZonaDeImpacto.Data
         }
 
 
-        //traremos la lista para el reporte
-        public async Task<List<Vehiculo>> ListarVehiculosReporteAsync()
-        {
-            List<Vehiculo> lista = new List<Vehiculo>();
-
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("SELECT * FROM Vehiculos", conn))
-            {
-                await conn.OpenAsync();
-
-                using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
-                {
-                    while (await dr.ReadAsync())
-                    {
-                        lista.Add(new Vehiculo
-                        {
-                            idVehiculo = dr.GetInt32(0),
-                            placa = dr.GetString(1),
-                            marca = dr.GetString(2),
-                            modelo = dr.GetString(3),
-                            anio = dr.IsDBNull(4) ? null : dr.GetInt32(4),
-                            kilometraje = dr.IsDBNull(5) ? null : dr.GetInt32(5),
-                            estado = dr.IsDBNull(6) ? null : dr.GetString(6)
-                        });
-                    }
-                }
-            }
-            return lista;
-        }
-
     }
 }
