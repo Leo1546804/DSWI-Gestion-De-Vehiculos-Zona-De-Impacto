@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ZonaDeImpacto.Data;
+using ZonaDeImpacto.Filters;
 using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Controllers
 {
+    [ValidarSesion]
+    [ValidarAdmin]
     public class VehiculoController : Controller
     {
         private readonly VehiculoRepository _repo;

@@ -5,7 +5,7 @@ namespace ZonaDeImpacto.Filters
 {
     public class ValidarAdminAttribute : ActionFilterAttribute
     {
-        public override void OnActionExecuted(ActionExecutedContext context)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             var rol = context.HttpContext.Session.GetString("rol");
 
@@ -15,7 +15,7 @@ namespace ZonaDeImpacto.Filters
                 context.Result = new RedirectToActionResult("AccesoDenegado", "Login", null);
             }
 
-            base.OnActionExecuted(context); 
+            base.OnActionExecuting(context); 
         }
 
     }

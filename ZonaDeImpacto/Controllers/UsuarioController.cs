@@ -6,8 +6,8 @@ using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Controllers
 {
-    [ValidarAdmin]
     [ValidarSesion]
+    [ValidarAdmin]
     public class UsuarioController : Controller
     {
         private readonly UsuarioRepository _repo;

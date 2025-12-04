@@ -20,6 +20,7 @@ builder.Services.AddHttpContextAccessor();
 // Registrar repositorio en el ADO.NET
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<LoginRepository>();
+builder.Services.AddScoped<VehiculoRepository>();
 
 var app = builder.Build();
 
