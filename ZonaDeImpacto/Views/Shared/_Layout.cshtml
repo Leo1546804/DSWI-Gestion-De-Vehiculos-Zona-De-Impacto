@@ -1,4 +1,5 @@
 ﻿@{
+    string nombre = Context.Session.GetString("nombre");
     // vamos a obtener el rol del usuario logueado para poder asignar las opciones permitidas
     string rol = Context.Session.GetString("rol");
     string _nameApp = "Zona de Impacto";
@@ -14,16 +15,22 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ZonaDeImpacto.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <link rel="icon" type="image/png" href="~/img/logo.jpg" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-dark border-bottom box-shadow mb-3" data-bs-theme="dark">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-dark border-bottom box-shadow mb-3" data-bs-theme="dark" style="position:relative">
             <div class="container-fluid">
                 <button class="navbar-toggler d-block border-0" type="button" data-bs-toggle="offcanvas" href="#offcanvas" role="button" aria-controls="offcanvasExample">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@_nameApp</a>
+                @if (!string.IsNullOrEmpty(nombre))
+                {
+                    <span class="text-white position-absolute end-0 top-50 translate-middle-y me-3">
+                        <i class="fa-solid fa-user"></i> @nombre
+                    </span>
+                }
                 <p></p>
             </div>
         </nav>
@@ -46,13 +53,52 @@
                 <!--Opciones permitidas para ADMIN-->
                 @if (rol == "Admin")
                 {
-                    <a asp-controller="Usuario" asp-action="Index" class="list-group-item list-group-item-action"><i class="fa-solid fa-user"></i> Usuarios</a>
+                    <a asp-controller="Usuario" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-user-gear"></i> Usuarios
+                    </a>
+
+                    <a asp-controller="Vehiculos" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-car"></i> Vehículos
+                    </a>
+
+                    <a asp-controller="TipoGasto" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-tags"></i> Tipos de gasto
+                    </a>
+
+                    <a asp-controller="Gastos" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-money-bill"></i> Gastos
+                    </a>
+
+                    <a asp-controller="Mantenimientos" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos
+                    </a>
+
+                    <a asp-controller="Reportes" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-chart-line"></i> Reportes
+                    </a>
+
                 }
 
                 <!--Opciones permitidas para trabajador-->
                 @if (rol == "Trabajador")
-                {       
-                    
+                {
+
+                    <a asp-controller="Gastos" asp-action="Crear" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-money-bill"></i> Registrar gasto
+                    </a>
+
+                    <a asp-controller="Mantenimientos" asp-action="Crear" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Registrar mantenimiento
+                    </a>
+
+                    <a asp-controller="Gastos" asp-action="MisGastos" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-list"></i> Mis gastos
+                    </a>
+
+                    <a asp-controller="Mantenimientos" asp-action="MisMantenimientos" class="list-group-item list-group-item-action">
+                        <i class="fa-solid fa-file-lines"></i> Mis mantenimientos
+                    </a>
+
                 }
 
                 <a asp-controller="Login" asp-action="Logout" class="list-group-item list-group-item-action text-danger">

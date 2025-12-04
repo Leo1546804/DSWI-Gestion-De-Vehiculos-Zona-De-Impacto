@@ -1,22 +1,44 @@
-﻿
-@{
+﻿@{
+    Layout = null;
     ViewBag.Title = "Login";
 }
 
-<h2>Iniciar Sesión</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Invictos</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="icon" type="image/png" href="~/img/logo.png" />
+</head>
+<body class="bg-light">
 
-<form method="post">
-    <div class="mb-3">
-        <label>Usuario</label>
-        <input name="usuario" class="form-control" required />
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card p-4 shadow" style="width: 100%; max-width: 380px;">
+            <div class="text-center mb-3">
+                <img src="~/img/logo.jpg" alt="Logo Invictos" style="width: 120px;" />
+            </div>
+
+            <h2 class="text-center mb-3">Iniciar Sesión</h2>
+
+            <form method="post">
+                <div class="mb-3">
+                    <label>Usuario</label>
+                    <input name="usuario" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label>Contraseña</label>
+                    <input name="password" type="password" class="form-control" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+
+                <span class="text-danger">@ViewBag.Error</span>
+            </form>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label>Contraseña</label>
-        <input name="password" type="password" class="form-control" required />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Ingresar</button>
-
-    <span class="text-danger">@ViewBag.Error</span>
-</form>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

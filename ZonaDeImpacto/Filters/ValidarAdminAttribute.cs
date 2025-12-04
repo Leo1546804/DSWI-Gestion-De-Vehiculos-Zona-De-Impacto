@@ -10,7 +10,7 @@ namespace ZonaDeImpacto.Filters
             var rol = context.HttpContext.Session.GetString("rol");
 
             //si es que el usuario ingresado no es un admin bloquear acceso
-            if(rol != null )
+            if(rol != "Admin" )
             {
                 context.Result = new RedirectToActionResult("AccesoDenegado", "Login", null);
             }
