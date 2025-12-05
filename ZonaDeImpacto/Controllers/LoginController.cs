@@ -29,6 +29,11 @@ namespace ZonaDeImpacto.Controllers
                 ViewBag.Error = "Usuario o contraseña incorrectos";
                 return View();
             }
+            if (!user.estado)
+            {
+                ViewBag.Error = "Usuario desactivado";
+                return View();
+            }
 
             HttpContext.Session.SetString("usuario", user.usuario);
             HttpContext.Session.SetString("nombre", user.nombreCompleto);
