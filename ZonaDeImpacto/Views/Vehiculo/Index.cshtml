@@ -1,10 +1,25 @@
-﻿@model IEnumerable<Vehiculo>
+﻿@model IEnumerable<ZonaDeImpacto.Models.Vehiculo>
 
-<h2>Lista de Vehículos</h2>
+@{
+    ViewData["Title"] = "Lista de Vehículos";
+}
 
+<h2 class="mb-4">Lista de Vehículos</h2>
 
-<table class="table table-bordered">
-    <thead>
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="mb-3">
+    <a href="@Url.Action("Crear", "Vehiculo")" class="btn btn-primary">Registrar Nuevo Vehículo</a>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
         <tr>
             <th>ID</th>
             <th>Placa</th>
@@ -16,7 +31,6 @@
             <th>Acciones</th>
         </tr>
     </thead>
-
     <tbody>
         @foreach (var v in Model)
         {
@@ -29,12 +43,10 @@
                 <td>@v.kilometraje</td>
                 <td>@v.estado</td>
                 <td>
-                    <a asp-action="Editar" asp-route-id="@v.idVehiculo" class="btn btn-warning btn-sm">
-                        Editar
-                    </a>
-                    <a asp-action="Eliminar" asp-route-id="@v.idVehiculo"
-                       class="btn btn-danger btn-sm"
-                       onclick="return confirm('¿Estás seguro de eliminar este vehículo?');">
+                    <a href="@Url.Action("Editar", "Vehiculo", new { id = v.idVehiculo })" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="@Url.Action("Eliminar", "Vehiculo", new { id = v.idVehiculo })"
+                       onclick="return confirm('¿Está seguro de eliminar este vehículo?');"
+                       class="btn btn-danger btn-sm">
                         Eliminar
                     </a>
                 </td>
@@ -42,4 +54,3 @@
         }
     </tbody>
 </table>
-

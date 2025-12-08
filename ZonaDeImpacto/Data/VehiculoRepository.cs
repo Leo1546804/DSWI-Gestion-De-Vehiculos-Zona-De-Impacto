@@ -24,7 +24,7 @@ namespace ZonaDeImpacto.Data
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
                 {
-                    while ( await dr.ReadAsync())
+                    while (await dr.ReadAsync())
                     {
                         lista.Add(new Vehiculo
                         {
@@ -37,21 +37,21 @@ namespace ZonaDeImpacto.Data
                             estado = dr.IsDBNull(6) ? null : dr.GetString(6)
                         });
                     }
-                    
-                        
-                    }
+
+
                 }
+            }
             return lista;
-            
+
         }
 
         //Registar
         public async Task RegistrarVehiculoAsync(Vehiculo v)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_listarVehiculo", conn))
+            using (SqlCommand cmd = new SqlCommand("sp_InsertarVehiculo", conn))
             {
-                cmd.CommandType= CommandType.StoredProcedure;
+                cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@placa", v.placa);
                 cmd.Parameters.AddWithValue("@marca", v.marca);

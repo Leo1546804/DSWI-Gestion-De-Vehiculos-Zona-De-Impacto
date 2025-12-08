@@ -7,31 +7,32 @@ namespace ZonaDeImpacto.Controllers
     public class VehiculoController : Controller
     {
         private readonly VehiculoRepository _repo;
-            public VehiculoController(VehiculoRepository repo)
-            {
+        public VehiculoController(VehiculoRepository repo)
+        {
             _repo = repo;
-            }
+        }
         //listamos
         public async Task<IActionResult> Index()
-            {
+        {
             var lista = await _repo.ListarVehiculosAsync();
             return View(lista);
         }
         // craemos get
-        public  IActionResult Crear()
+        public IActionResult Crear()
         {
             return View();
         }
 
         //creamos post
         [HttpPost]
-        public async Task<IActionResult> Crear(Vehiculo modelo)
+        public async Task<IActionResult> Crear(Vehiculo veh)
         {
             if (!ModelState.IsValid)
             {
-                return View(modelo);
+                return View(veh);
             }
-            await _repo.RegistrarVehiculoAsync(modelo);
+            await _repo.RegistrarVehiculoAsync(veh);
+            TempData["Mensaje"] = "Vehículo registrado correctamente.";
             return RedirectToAction("Index");
         }
 
@@ -46,14 +47,15 @@ namespace ZonaDeImpacto.Controllers
 
         // editamos post
         [HttpPost]
-        public async Task<IActionResult> Editar(Vehiculo modelo)
+        public async Task<IActionResult> Editar(Vehiculo veh)
         {
             if (!ModelState.IsValid)
             {
-                return View(modelo);
+                return View(veh);
             }
 
-            await _repo.EditarVehiculoAsync(modelo);
+            await _repo.EditarVehiculoAsync(veh);
+            TempData["Mensaje"] = "Vehículo actualizado correctamente.";
             return RedirectToAction("Index");
         }
 
@@ -61,9 +63,10 @@ namespace ZonaDeImpacto.Controllers
         public async Task<IActionResult> Eliminar(int id)
         {
             await _repo.EliminarVehiculoAsync(id);
+            TempData["Mensaje"] = "Vehículo eliminado correctamente.";
             return RedirectToAction("Index");
         }
 
-    
+
     }
 }
