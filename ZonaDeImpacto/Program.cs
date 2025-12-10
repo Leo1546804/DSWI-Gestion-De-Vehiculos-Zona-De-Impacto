@@ -8,7 +8,7 @@ builder.Services.AddControllersWithViews();
 // Habilitar sesiones
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(30);
+    options.IdleTimeout = TimeSpan.FromSeconds(600);
 });
 
 // Acceso al HttpContext

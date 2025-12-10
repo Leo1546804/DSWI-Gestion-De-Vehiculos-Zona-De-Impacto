@@ -1,0 +1,210 @@
+﻿@model ZonaDeImpacto.Models.Vehiculo
+@{
+    ViewData["Title"] = "Detalles del Vehículo";
+}
+
+<div class="card shadow-sm" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header text-white" style="background-color: #17a2b8;">
+        <h5 class="mb-0">
+            <i class="fas fa-car me-2"></i>@ViewData["Title"]
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-4">
+            <!-- Columna izquierda: Información del vehículo -->
+            <div class="col-md-7">
+                <div class="card h-100 border-0">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3" style="color: #1a237e !important;">
+                                    <i class="fas fa-info-circle me-2"></i>Información General
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Placa:</label>
+                                    <span class="detail-value">
+                                        <span class="badge bg-dark fs-6 px-3 py-2">@Model.placa</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Marca:</label>
+                                    <span class="detail-value">@Model.marca</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Modelo:</label>
+                                    <span class="detail-value">@Model.modelo</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Tipo:</label>
+                                    <span class="detail-value">@(Model.tipo ?? "No especificado")</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Año:</label>
+                                    <span class="detail-value">@(Model.anio?.ToString() ?? "No especificado")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3" style="color: #1a237e !important;">
+                                    <i class="fas fa-chart-line me-2"></i>Especificaciones
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Kilometraje:</label>
+                                    <span class="detail-value">
+                                        @if (Model.kilometraje.HasValue)
+                                        {
+                                            @Model.kilometraje.Value.ToString("N0") <text> km</text>
+                                        }
+                                        else
+                                        {
+                                            <text>No especificado</text>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Estado:</label>
+                                    <span class="detail-value">
+                                        @if (Model.estado == "Operativo")
+                                        {
+                                            <span class="badge bg-success px-3 py-2">@Model.estado</span>
+                                        }
+                                        else if (Model.estado == "En Taller")
+                                        {
+                                            <span class="badge bg-warning px-3 py-2">@Model.estado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary px-3 py-2">@Model.estado</span>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Imagen del vehículo (más grande) -->
+            <div class="col-md-5">
+                <div class="card h-100 border-0 d-flex justify-content-center align-items-center">
+                    <div class="text-center">
+                        @if (!string.IsNullOrEmpty(Model.tipo))
+                        {
+                            <div style="width: 280px; height: 250px; margin: 0 auto; border: 3px solid #dee2e6; border-radius: 10px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                <img src="~/Imagenes/Vehiculos/@(Model.tipo).png"
+                                     alt="@Model.tipo"
+                                     style="max-width: 250px; max-height: 220px; object-fit: contain;"
+                                     onerror="this.src='~/Imagenes/Vehiculos/placeholder.png'" />
+                            </div>
+                            <p class="mt-3 mb-0 fs-5">
+                                <strong>@Model.tipo</strong>
+                            </p>
+                        }
+                        else
+                        {
+                            <div style="width: 280px; height: 250px; margin: 0 auto; border: 2px dashed #dee2e6; border-radius: 10px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                <img src="~/Imagenes/Vehiculos/placeholder.png"
+                                     alt="Imagen no disponible"
+                                     style="max-width: 250px; max-height: 220px; object-fit: contain;" />
+                            </div>
+                            <p class="mt-3 mb-0 text-muted">
+                                Tipo no especificado
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top">
+            <div class="d-flex justify-content-center gap-3">
+                <a asp-action="Editar" asp-route-id="@Model.idVehiculo" class="btn btn-warning px-4">
+                    <i class="fas fa-edit me-1"></i> Editar Vehículo
+                </a>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-item {
+        padding: 8px 0;
+    }
+
+    .detail-label {
+        display: block;
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 3px;
+    }
+
+    .detail-value {
+        display: block;
+        font-size: 15px;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    h6.text-primary {
+        color: #1a237e !important;
+        font-weight: 600;
+        border-bottom: 2px solid #1a237e;
+        padding-bottom: 8px;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .btn {
+        min-width: 150px;
+    }
+
+    .badge.bg-dark {
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    /* Eliminar márgenes y padding innecesarios */
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .row.g-4 {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+    }
+
+    /* Asegurar que ambas columnas tengan la misma altura */
+    .h-100 {
+        height: 100% !important;
+    }
+</style>

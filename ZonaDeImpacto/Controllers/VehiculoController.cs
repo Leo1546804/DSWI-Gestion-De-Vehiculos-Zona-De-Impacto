@@ -11,15 +11,18 @@ namespace ZonaDeImpacto.Controllers
         {
             _repo = repo;
         }
+
         //listamos
         public async Task<IActionResult> Index()
         {
             var lista = await _repo.ListarVehiculosAsync();
             return View(lista);
         }
-        // craemos get
+
+        // creamos get
         public IActionResult Crear()
         {
+            ViewBag.Tipos = _repo.ObtenerTiposVehiculos();
             return View();
         }
 
@@ -29,6 +32,7 @@ namespace ZonaDeImpacto.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.Tipos = _repo.ObtenerTiposVehiculos();
                 return View(veh);
             }
             await _repo.RegistrarVehiculoAsync(veh);
@@ -42,6 +46,7 @@ namespace ZonaDeImpacto.Controllers
             var vehiculo = await _repo.ObtenerVehiculoAsync(id);
             if (vehiculo == null) return NotFound();
 
+            ViewBag.Tipos = _repo.ObtenerTiposVehiculos();
             return View(vehiculo);
         }
 
@@ -51,12 +56,22 @@ namespace ZonaDeImpacto.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.Tipos = _repo.ObtenerTiposVehiculos();
                 return View(veh);
             }
 
             await _repo.EditarVehiculoAsync(veh);
             TempData["Mensaje"] = "Vehículo actualizado correctamente.";
             return RedirectToAction("Index");
+        }
+
+        // detalles get
+        public async Task<IActionResult> Detalles(int id)
+        {
+            var vehiculo = await _repo.ObtenerVehiculoAsync(id);
+            if (vehiculo == null) return NotFound();
+
+            return View(vehiculo);
         }
 
         // eliminamos
@@ -66,7 +81,5 @@ namespace ZonaDeImpacto.Controllers
             TempData["Mensaje"] = "Vehículo eliminado correctamente.";
             return RedirectToAction("Index");
         }
-
-
     }
 }

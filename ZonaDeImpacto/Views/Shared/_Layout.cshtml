@@ -1,121 +1,331 @@
 ﻿@{
     string nombre = Context.Session.GetString("nombre");
-    // vamos a obtener el rol del usuario logueado para poder asignar las opciones permitidas
     string rol = Context.Session.GetString("rol");
     string _nameApp = "Zona de Impacto";
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @_nameApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ZonaDeImpacto.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/png" href="~/img/logo.jpg" />
+
+    <style>
+        /* Colores principales */
+        :root {
+            --color-primario: #1a237e;
+            --color-secundario: #ff5722;
+            --color-accento: #00acc1;
+        }
+
+        /* ESTRUCTURA FLEX PARA FOOTER FIJO  */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
+            padding-top: 70px; /* Para el navbar fijo */
+        }
+
+        /* CONTENEDOR PRINCIPAL QUE CRECE Y EMPUJA EL FOOTER */
+        #page-wrapper {
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Contenido principal que puede crecer */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* Footer que NO se mueve */
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            flex-shrink: 0;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .table {
+            background-color: white;
+        }
+
+        /* Navbar sin espacio extra */
+        .navbar {
+            background-color: var(--color-primario) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .logo-icon {
+            color: var(--color-secundario);
+            margin-right: 8px;
+        }
+
+        /* Badges ovalados para roles */
+        .badge-admin {
+            background-color: #5656a6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-trabajador {
+            background-color: #2ba1a1;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 0;
+            min-height: 400px; /* Altura mínima para contenido corto */
+        }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            border-left: 4px solid transparent;
+            color: #495057;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s;
+        }
+
+            .sidebar-item:hover {
+                background-color: #e9ecef;
+                border-left: 4px solid var(--color-secundario);
+            }
+
+            .sidebar-item.active {
+                background-color: #e3f2fd;
+                border-left: 4px solid var(--color-primario);
+                font-weight: bold;
+            }
+
+        /* Estilos para tarjetas */
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: var(--color-primario);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: bold;
+            padding: 15px 20px;
+        }
+
+        /* Botones */
+        .btn-primario {
+            background-color: var(--color-primario);
+            border-color: var(--color-primario);
+            color: white;
+        }
+
+            .btn-primario:hover {
+                background-color: #0d1b6b;
+                border-color: #0d1b6b;
+                color: white;
+            }
+
+        .btn-secundario {
+            background-color: var(--color-secundario);
+            border-color: var(--color-secundario);
+            color: white;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                margin-bottom: 20px;
+                min-height: auto;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            body {
+                padding-top: 70px;
+            }
+        }
+
+        /* Tablas */
+        .table thead th {
+            background-color: var(--color-primario);
+            color: white;
+            border: none;
+        }
+
+        /* Textos */
+        .text-primario {
+            color: var(--color-primario) !important;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-dark border-bottom box-shadow mb-3" data-bs-theme="dark" style="position:relative">
-            <div class="container-fluid">
-                <button class="navbar-toggler d-block border-0" type="button" data-bs-toggle="offcanvas" href="#offcanvas" role="button" aria-controls="offcanvasExample">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@_nameApp</a>
-                @if (!string.IsNullOrEmpty(nombre))
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-car-crash logo-icon"></i> @_nameApp
+            </a>
+
+            @if (!string.IsNullOrEmpty(nombre))
+            {
+                <div class="navbar-text text-white">
+                    <i class="fas fa-user me-1"></i> @nombre
+                    @if (rol == "Admin")
+                    {
+                        <span class="badge-admin ms-2">Administrador</span>
+                    }
+                    else if (rol == "Trabajador")
+                    {
+                        <span class="badge-trabajador ms-2">Trabajador</span>
+                    }
+                </div>
+            }
+        </div>
+    </nav>
+
+    <!-- CONTENEDOR PRINCIPAL QUE EMPUJA EL FOOTER -->
+    <div id="page-wrapper">
+        <div class="container-fluid mt-3">
+            <div class="row">
+                @if (!string.IsNullOrEmpty(rol))
                 {
-                    <span class="text-white position-absolute end-0 top-50 translate-middle-y me-3">
-                        <i class="fa-solid fa-user"></i> @nombre
-                    </span>
+                    <!-- Sidebar -->
+                    <div class="col-lg-2 col-md-3 sidebar">
+                        <div class="sticky-top pt-4">
+                            <h5 class="text-primario px-3 mb-4">
+                                <i class="fas fa-bars me-2"></i>Menú Principal
+                            </h5>
+
+                            <div class="mb-4">
+                                <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home me-2"></i> Inicio
+                                </a>
+
+                                @if (rol == "Admin")
+                                {
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Usuario" ? "active" : "")"
+                                       asp-controller="Usuario" asp-action="Index">
+                                        <i class="fas fa-users me-2"></i> Usuarios
+                                    </a>
+
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vehiculo" ? "active" : "")"
+                                       asp-controller="Vehiculo" asp-action="Index">
+                                        <i class="fas fa-car me-2"></i> Vehículos
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-tags me-2"></i> Tipos de Gasto
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-tools me-2"></i> Mantenimientos
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-money-bill-wave me-2"></i> Gastos
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-chart-bar me-2"></i> Reportes
+                                    </a>
+                                }
+
+                                @if (rol == "Trabajador")
+                                {
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-wrench me-2"></i> Registrar Mantenimiento
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-money-bill-wave me-2"></i> Registrar Gasto
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-list me-2"></i> Mis Mantenimientos
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i> Mis Gastos Reportados
+                                    </a>
+                                }
+                            </div>
+
+                            <hr>
+                            <a class="sidebar-item text-danger mt-3" asp-controller="Login" asp-action="Logout">
+                                <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
                 }
-                <p></p>
+
+                <!-- Main Content -->
+                <div class="@(!string.IsNullOrEmpty(rol) ? "col-lg-10 col-md-9" : "col-12")">
+                    <main class="main-content">
+                        @RenderBody()
+                    </main>
+                </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
     </div>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel" data-bs-theme="dark">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLabel">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div class="list-group list-group-flush">
-                <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action"><i class="fa-solid fa-house"></i> Inicio</a>
-                
-                <!--Opciones permitidas para ADMIN-->
-                @if (rol == "Admin")
-                {
-                    <a asp-controller="Usuario" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-user-gear"></i> Usuarios
-                    </a>
-
-                    <a asp-controller="Vehiculo" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-car"></i> Vehículos
-                    </a>
-
-                    <a asp-controller="TipoGasto" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-tags"></i> Tipos de gasto
-                    </a>
-
-                    <a asp-controller="Gastos" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-money-bill"></i> Gastos
-                    </a>
-
-                    <a asp-controller="Mantenimientos" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos
-                    </a>
-
-                    <a asp-controller="Reportes" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-chart-line"></i> Reportes
-                    </a>
-
-                }
-
-                <!--Opciones permitidas para trabajador-->
-                @if (rol == "Trabajador")
-                {
-
-                    <a asp-controller="Gastos" asp-action="Crear" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-money-bill"></i> Registrar gasto
-                    </a>
-
-                    <a asp-controller="Mantenimientos" asp-action="Crear" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Registrar mantenimiento
-                    </a>
-
-                    <a asp-controller="Gastos" asp-action="MisGastos" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-list"></i> Mis gastos
-                    </a>
-
-                    <a asp-controller="Mantenimientos" asp-action="MisMantenimientos" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-file-lines"></i> Mis mantenimientos
-                    </a>
-
-                }
-
-                <a asp-controller="Login" asp-action="Logout" class="list-group-item list-group-item-action text-danger">
-                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - @_nameApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">
+                &copy; @DateTime.Now.Year - @_nameApp |
+                Sistema de Gestión de Mantenimiento de Vehículos
+            </p>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

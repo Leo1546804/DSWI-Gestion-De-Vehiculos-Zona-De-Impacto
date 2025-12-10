@@ -1,6 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
-using System.Data;
-using System.Reflection;
+﻿using System.Data;
+using System.Text;
+using Microsoft.Data.SqlClient;
 using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Data
@@ -8,119 +8,162 @@ namespace ZonaDeImpacto.Data
     public class UsuarioRepository
     {
         private readonly string _connectionString;
+
         public UsuarioRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("conexion");
         }
 
-        //listado de usuarios
+        // Listado de usuarios
         public async Task<List<Usuario>> ListarUsuariosAsync()
         {
-            List<Usuario> lista = new List<Usuario>();
+            var lista = new List<Usuario>();
 
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using(SqlCommand cmd = new SqlCommand("sp_ListarUsuarios", conn))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                cmd.CommandType = CommandType.StoredProcedure;
                 await conn.OpenAsync();
-
-                using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand("sp_ListarUsuarios", conn))
                 {
-                    while(await dr.ReadAsync())
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    using (var dr = await cmd.ExecuteReaderAsync())
                     {
-                        lista.Add(new Usuario
+                        while (await dr.ReadAsync())
                         {
-                            idUsuario = dr.GetInt32(0),
-                            nombreCompleto = dr.GetString(1),
-                            usuario = dr.GetString(2),
-                            rol = dr.GetString(3),
-                            estado = dr.GetBoolean(4)
-                        });
+                            lista.Add(new Usuario
+                            {
+                                idUsuario = dr.GetInt32(dr.GetOrdinal("idUsuario")),
+                                nombreCompleto = dr.GetString(dr.GetOrdinal("nombreCompleto")),
+                                usuario = dr.GetString(dr.GetOrdinal("usuario")),
+                                rol = dr.GetString(dr.GetOrdinal("rol")),
+                                estado = dr.GetBoolean(dr.GetOrdinal("estado"))
+                            });
+                        }
                     }
                 }
             }
             return lista;
         }
 
-        //registrar usuario
+        // Registrar usuario
         public async Task RegistrarUsuarioAsync(Usuario usuario)
         {
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_InsertarUsuario", conn))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@nombreCompleto", usuario.nombreCompleto);
-                cmd.Parameters.AddWithValue("@usuario", usuario.usuario);
-                cmd.Parameters.AddWithValue("@password", usuario.password);
-                cmd.Parameters.AddWithValue("@rol", usuario.rol);
-
                 await conn.OpenAsync();
-                await cmd.ExecuteNonQueryAsync();
+                using (var cmd = new SqlCommand("sp_InsertarUsuario", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@nombreCompleto", usuario.nombreCompleto);
+                    cmd.Parameters.AddWithValue("@usuario", usuario.usuario);
+                    cmd.Parameters.AddWithValue("@password", usuario.password);
+                    cmd.Parameters.AddWithValue("@rol", usuario.rol);
+
+                    await cmd.ExecuteNonQueryAsync();
+                }
             }
         }
 
-        //Buscar usuario por id
+        // Buscar usuario por id
         public async Task<Usuario> ObtenerUsuarioAsync(int id)
         {
             Usuario usuario = null;
 
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ObtenerUsuario", conn))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@idUsuario", id);
-
                 await conn.OpenAsync();
-
-                using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand("sp_ObtenerUsuario", conn))
                 {
-                    if (await dr.ReadAsync())
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@idUsuario", id);
+
+                    using (var dr = await cmd.ExecuteReaderAsync())
                     {
-                        usuario = new Usuario
+                        if (await dr.ReadAsync())
                         {
-                            idUsuario = dr.GetInt32(0),
-                            nombreCompleto = dr.GetString(1),
-                            usuario = dr.GetString(2),
-                            password = dr.GetString(3),
-                            rol = dr.GetString(4),
-                            estado = dr.GetBoolean(5)
-                        };
+                            usuario = new Usuario
+                            {
+                                idUsuario = dr.GetInt32(dr.GetOrdinal("idUsuario")),
+                                nombreCompleto = dr.GetString(dr.GetOrdinal("nombreCompleto")),
+                                usuario = dr.GetString(dr.GetOrdinal("usuario")),
+                                password = dr.GetString(dr.GetOrdinal("password")),
+                                rol = dr.GetString(dr.GetOrdinal("rol")),
+                                estado = dr.GetBoolean(dr.GetOrdinal("estado"))
+                            };
+                        }
                     }
                 }
             }
             return usuario;
         }
 
+        // Editar usuario
         public async Task EditarUsuarioAsync(Usuario usuario)
         {
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EditarUsuario", conn))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                cmd.CommandType= CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@idUsuario", usuario.idUsuario);
-                cmd.Parameters.AddWithValue("@nombreCompleto", usuario.nombreCompleto);
-                cmd.Parameters.AddWithValue("@usuario", usuario.usuario);
-                cmd.Parameters.AddWithValue("@password", usuario.password);
-                cmd.Parameters.AddWithValue("@rol", usuario.rol);
-                cmd.Parameters.AddWithValue("@estado", usuario.estado);
-
                 await conn.OpenAsync();
-                await cmd.ExecuteNonQueryAsync();
+                using (var cmd = new SqlCommand("sp_EditarUsuario", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@idUsuario", usuario.idUsuario);
+                    cmd.Parameters.AddWithValue("@nombreCompleto", usuario.nombreCompleto);
+                    cmd.Parameters.AddWithValue("@usuario", usuario.usuario);
+                    cmd.Parameters.AddWithValue("@password", usuario.password);
+                    cmd.Parameters.AddWithValue("@rol", usuario.rol);
+                    cmd.Parameters.AddWithValue("@estado", usuario.estado);
+
+                    await cmd.ExecuteNonQueryAsync();
+                }
             }
         }
 
+        // Eliminar usuario (cambia estado a 0)
         public async Task EliminarUsuarioAsync(int idUsuario)
         {
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EliminarUsuario", conn))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
-
                 await conn.OpenAsync();
-                await cmd.ExecuteNonQueryAsync();
+                using (var cmd = new SqlCommand("sp_EliminarUsuario", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        // Método adicional para verificar si usuario existe
+        public async Task<bool> ExisteUsuarioAsync(string nombreUsuario)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                using (var cmd = new SqlCommand("SELECT COUNT(*) FROM Usuarios WHERE usuario = @usuario", conn))
+                {
+                    cmd.Parameters.AddWithValue("@usuario", nombreUsuario);
+                    var count = (int)await cmd.ExecuteScalarAsync();
+                    return count > 0;
+                }
+            }
+        }
+
+        // Método para cambiar solo el estado
+        public async Task CambiarEstadoAsync(int idUsuario, bool nuevoEstado)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                using (var cmd = new SqlCommand("UPDATE Usuarios SET estado = @estado WHERE idUsuario = @idUsuario", conn))
+                {
+                    cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+                    cmd.Parameters.AddWithValue("@estado", nuevoEstado);
+
+                    await cmd.ExecuteNonQueryAsync();
+                }
             }
         }
 

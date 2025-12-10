@@ -11,6 +11,7 @@ namespace ZonaDeImpacto.Data
         {
             _connectionString = configuration.GetConnectionString("conexion");
         }
+
         //Listar
         public async Task<List<Vehiculo>> ListarVehiculosAsync()
         {
@@ -32,17 +33,15 @@ namespace ZonaDeImpacto.Data
                             placa = dr.GetString(1),
                             marca = dr.GetString(2),
                             modelo = dr.GetString(3),
-                            anio = dr.IsDBNull(4) ? null : dr.GetInt32(4),
-                            kilometraje = dr.IsDBNull(5) ? null : dr.GetInt32(5),
-                            estado = dr.IsDBNull(6) ? null : dr.GetString(6)
+                            tipo = dr.IsDBNull(4) ? null : dr.GetString(4),
+                            anio = dr.IsDBNull(5) ? null : dr.GetInt32(5),
+                            kilometraje = dr.IsDBNull(6) ? null : dr.GetInt32(6),
+                            estado = dr.IsDBNull(7) ? null : dr.GetString(7)
                         });
                     }
-
-
                 }
             }
             return lista;
-
         }
 
         //Registar
@@ -56,6 +55,7 @@ namespace ZonaDeImpacto.Data
                 cmd.Parameters.AddWithValue("@placa", v.placa);
                 cmd.Parameters.AddWithValue("@marca", v.marca);
                 cmd.Parameters.AddWithValue("@modelo", v.modelo);
+                cmd.Parameters.AddWithValue("@tipo", v.tipo ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@anio", v.anio ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@kilometraje", v.kilometraje ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@estado", v.estado ?? (object)DBNull.Value);
@@ -64,6 +64,7 @@ namespace ZonaDeImpacto.Data
                 await cmd.ExecuteNonQueryAsync();
             }
         }
+
         // obtener por ID
         public async Task<Vehiculo> ObtenerVehiculoAsync(int id)
         {
@@ -87,9 +88,10 @@ namespace ZonaDeImpacto.Data
                             placa = dr.GetString(1),
                             marca = dr.GetString(2),
                             modelo = dr.GetString(3),
-                            anio = dr.IsDBNull(4) ? null : dr.GetInt32(4),
-                            kilometraje = dr.IsDBNull(5) ? null : dr.GetInt32(5),
-                            estado = dr.IsDBNull(6) ? null : dr.GetString(6)
+                            tipo = dr.IsDBNull(4) ? null : dr.GetString(4),
+                            anio = dr.IsDBNull(5) ? null : dr.GetInt32(5),
+                            kilometraje = dr.IsDBNull(6) ? null : dr.GetInt32(6),
+                            estado = dr.IsDBNull(7) ? null : dr.GetString(7)
                         };
                     }
                 }
@@ -109,6 +111,7 @@ namespace ZonaDeImpacto.Data
                 cmd.Parameters.AddWithValue("@placa", v.placa);
                 cmd.Parameters.AddWithValue("@marca", v.marca);
                 cmd.Parameters.AddWithValue("@modelo", v.modelo);
+                cmd.Parameters.AddWithValue("@tipo", v.tipo ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@anio", v.anio ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@kilometraje", v.kilometraje ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@estado", v.estado ?? (object)DBNull.Value);
@@ -132,6 +135,26 @@ namespace ZonaDeImpacto.Data
             }
         }
 
-
+        // Método para obtener los tipos de vehículos disponibles
+        public List<string> ObtenerTiposVehiculos()
+        {
+            return new List<string>
+            {
+                "Bus",
+                "Compacto",
+                "Convertible",
+                "CrossOver",
+                "Cupe",
+                "Furgoneta",
+                "HatchBack",
+                "Limusina",
+                "MicroBus",
+                "Pick-Up",
+                "Roadster",
+                "Sedan",
+                "SUV",
+                "TodoTerreno"
+            };
+        }
     }
 }

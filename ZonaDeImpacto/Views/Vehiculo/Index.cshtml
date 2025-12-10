@@ -1,56 +1,167 @@
 ﻿@model IEnumerable<ZonaDeImpacto.Models.Vehiculo>
 
 @{
-    ViewData["Title"] = "Lista de Vehículos";
+    ViewData["Title"] = "Gestión de Vehículos";
 }
-
-<h2 class="mb-4">Lista de Vehículos</h2>
 
 @if (TempData["Mensaje"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Mensaje"]
+        <i class="fas fa-check-circle me-2"></i> @TempData["Mensaje"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
-<div class="mb-3">
-    <a href="@Url.Action("Crear", "Vehiculo")" class="btn btn-primary">Registrar Nuevo Vehículo</a>
+<div class="card shadow-sm">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="fas fa-car me-2"></i>@ViewData["Title"]
+                </h5>
+            </div>
+            <div>
+                <a asp-action="Crear" class="btn btn-success px-4">
+                    <i class="fas fa-plus me-1"></i> Nuevo Vehículo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr class="table-primary">
+                        <th>Placa</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Tipo</th>
+                        <th>Año</th>
+                        <th>Kilometraje</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var vehiculo in Model)
+                    {
+                        <tr>
+                            <td><strong>@vehiculo.placa</strong></td>
+                            <td>@vehiculo.marca</td>
+                            <td>@vehiculo.modelo</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(vehiculo.tipo))
+                                {
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                                            <img src="~/Imagenes/Vehiculos/@(vehiculo.tipo).png"
+                                                 alt="@vehiculo.tipo"
+                                                 style="width: 24px; height: 24px; object-fit: contain;"
+                                                 onerror="this.src='~/Imagenes/Vehiculos/placeholder.png'" />
+                                        </div>
+                                        <span>@vehiculo.tipo</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin tipo</span>
+                                }
+                            </td>
+                            <td>@vehiculo.anio</td>
+                            <td>
+                                @if (vehiculo.kilometraje.HasValue)
+                                {
+                                    @vehiculo.kilometraje.Value.ToString("N0") <text>km</text>
+                                }
+                                else
+                                {
+                                    <text>-</text>
+                                }
+                            </td>
+                            <td>
+                                @if (vehiculo.estado == "Operativo")
+                                {
+                                    <span class="badge bg-success">@vehiculo.estado</span>
+                                }
+                                else if (vehiculo.estado == "En Taller")
+                                {
+                                    <span class="badge bg-warning">@vehiculo.estado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@vehiculo.estado</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <!-- Botón Detalles -->
+                                    <a asp-action="Detalles" asp-route-id="@vehiculo.idVehiculo" class="btn btn-info btn-sm" style="min-width: 90px;">
+                                        <i class="fas fa-eye me-1"></i> Detalles
+                                    </a>
+
+                                    <!-- Botón Editar -->
+                                    <a asp-action="Editar" asp-route-id="@vehiculo.idVehiculo" class="btn btn-warning btn-sm" style="min-width: 80px;">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+
+                                    <!-- Botón Eliminar -->
+                                    <a asp-action="Eliminar" asp-route-id="@vehiculo.idVehiculo" class="btn btn-danger btn-sm" style="min-width: 80px;"
+                                       onclick="return confirm('¿ESTÁS SEGURO? Esta acción eliminará permanentemente el vehículo y no se podrá recuperar.');">
+                                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <i class="fas fa-info-circle fa-lg text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No hay vehículos registrados</p>
+                                <a asp-action="Crear" class="btn btn-success mt-2">
+                                    <i class="fas fa-plus me-1"></i> Agregar Primer Vehículo
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Placa</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Año</th>
-            <th>Kilometraje</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var v in Model)
-        {
-            <tr>
-                <td>@v.idVehiculo</td>
-                <td>@v.placa</td>
-                <td>@v.marca</td>
-                <td>@v.modelo</td>
-                <td>@v.anio</td>
-                <td>@v.kilometraje</td>
-                <td>@v.estado</td>
-                <td>
-                    <a href="@Url.Action("Editar", "Vehiculo", new { id = v.idVehiculo })" class="btn btn-warning btn-sm">Editar</a>
-                    <a href="@Url.Action("Eliminar", "Vehiculo", new { id = v.idVehiculo })"
-                       onclick="return confirm('¿Está seguro de eliminar este vehículo?');"
-                       class="btn btn-danger btn-sm">
-                        Eliminar
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<style>
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background-color: #1a237e;
+        color: white;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .d-flex.gap-2 {
+        gap: 10px !important;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+</style>
