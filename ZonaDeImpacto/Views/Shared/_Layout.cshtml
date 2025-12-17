@@ -1,121 +1,147 @@
 ﻿@{
     string nombre = Context.Session.GetString("nombre");
-    // vamos a obtener el rol del usuario logueado para poder asignar las opciones permitidas
     string rol = Context.Session.GetString("rol");
     string _nameApp = "Zona de Impacto";
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @_nameApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ZonaDeImpacto.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/png" href="~/img/logo.jpg" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-dark border-bottom box-shadow mb-3" data-bs-theme="dark" style="position:relative">
-            <div class="container-fluid">
-                <button class="navbar-toggler d-block border-0" type="button" data-bs-toggle="offcanvas" href="#offcanvas" role="button" aria-controls="offcanvasExample">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@_nameApp</a>
-                @if (!string.IsNullOrEmpty(nombre))
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-car-crash logo-icon"></i> @_nameApp
+            </a>
+
+            @if (!string.IsNullOrEmpty(nombre))
+            {
+                <div class="navbar-text text-white">
+                    <i class="fas fa-user me-1"></i> @nombre
+                    @if (rol == "Admin")
+                    {
+                        <span class="badge-admin ms-2">Administrador</span>
+                    }
+                    else if (rol == "Trabajador")
+                    {
+                        <span class="badge-trabajador ms-2">Trabajador</span>
+                    }
+                </div>
+            }
+        </div>
+    </nav>
+
+    <!-- CONTENEDOR PRINCIPAL QUE EMPUJA EL FOOTER -->
+    <div id="page-wrapper">
+        <div class="container-fluid mt-3">
+            <div class="row">
+                @if (!string.IsNullOrEmpty(rol))
                 {
-                    <span class="text-white position-absolute end-0 top-50 translate-middle-y me-3">
-                        <i class="fa-solid fa-user"></i> @nombre
-                    </span>
+                    <!-- Sidebar -->
+                    <div class="col-lg-2 col-md-3 sidebar">
+                        <div class="sticky-top pt-4">
+                            <h5 class="text-primario px-3 mb-4">
+                                <i class="fas fa-bars me-2"></i>Menú Principal
+                            </h5>
+
+                            <div class="mb-4">
+                                <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home me-2"></i> Inicio
+                                </a>
+
+                                @if (rol == "Admin")
+                                {
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Usuario" ? "active" : "")"
+                                       asp-controller="Usuario" asp-action="Index">
+                                        <i class="fas fa-users me-2"></i> Usuarios
+                                    </a>
+
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vehiculo" ? "active" : "")"
+                                       asp-controller="Vehiculo" asp-action="Index">
+                                        <i class="fas fa-car me-2"></i> Vehículos
+                                    </a>
+                                    <!-- MANTENIMIENTOS  -->
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Mantenimiento" ? "active" : "")"
+                                       asp-controller="Mantenimiento" asp-action="Index">
+                                        <i class="fas fa-tools me-2"></i> Mantenimientos
+                                    </a>
+
+                                    <!-- TIPOS DE GASTO (después de Mantenimientos) -->
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "TipoGasto" ? "active" : "")"
+                                       asp-controller="TipoGasto" asp-action="Index">
+                                        <i class="fas fa-tags me-2"></i> Tipos de Gasto
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-money-bill-wave me-2"></i> Gastos
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-chart-bar me-2"></i> Reportes
+                                    </a>
+                                }
+
+                                @if (rol == "Trabajador")
+                                {
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-wrench me-2"></i> Registrar Mantenimiento
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-money-bill-wave me-2"></i> Registrar Gasto
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-list me-2"></i> Mis Mantenimientos
+                                    </a>
+
+                                    <a class="sidebar-item" href="#">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i> Mis Gastos Reportados
+                                    </a>
+                                }
+                            </div>
+
+                            <hr>
+                            <a class="sidebar-item text-danger mt-3" asp-controller="Login" asp-action="Logout">
+                                <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
                 }
-                <p></p>
+
+                <!-- Main Content -->
+                <div class="@(!string.IsNullOrEmpty(rol) ? "col-lg-10 col-md-9" : "col-12")">
+                    <main class="main-content">
+                        @RenderBody()
+                    </main>
+                </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
     </div>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel" data-bs-theme="dark">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLabel">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div class="list-group list-group-flush">
-                <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action"><i class="fa-solid fa-house"></i> Inicio</a>
-                
-                <!--Opciones permitidas para ADMIN-->
-                @if (rol == "Admin")
-                {
-                    <a asp-controller="Usuario" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-user-gear"></i> Usuarios
-                    </a>
-
-                    <a asp-controller="Vehiculo" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-car"></i> Vehículos
-                    </a>
-
-                    <a asp-controller="TipoGasto" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-tags"></i> Tipos de gasto
-                    </a>
-
-                    <a asp-controller="Gastos" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-money-bill"></i> Gastos
-                    </a>
-
-                    <a asp-controller="Mantenimientos" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos
-                    </a>
-
-                    <a asp-controller="Reportes" asp-action="Index" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-chart-line"></i> Reportes
-                    </a>
-
-                }
-
-                <!--Opciones permitidas para trabajador-->
-                @if (rol == "Trabajador")
-                {
-
-                    <a asp-controller="Gastos" asp-action="Crear" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-money-bill"></i> Registrar gasto
-                    </a>
-
-                    <a asp-controller="Mantenimientos" asp-action="Crear" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Registrar mantenimiento
-                    </a>
-
-                    <a asp-controller="Gastos" asp-action="MisGastos" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-list"></i> Mis gastos
-                    </a>
-
-                    <a asp-controller="Mantenimientos" asp-action="MisMantenimientos" class="list-group-item list-group-item-action">
-                        <i class="fa-solid fa-file-lines"></i> Mis mantenimientos
-                    </a>
-
-                }
-
-                <a asp-controller="Login" asp-action="Logout" class="list-group-item list-group-item-action text-danger">
-                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - @_nameApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">
+                &copy; @DateTime.Now.Year - @_nameApp |
+                Sistema de Gestión de Mantenimiento de Vehículos
+            </p>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

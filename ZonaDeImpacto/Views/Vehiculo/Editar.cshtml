@@ -1,47 +1,98 @@
 ﻿@model ZonaDeImpacto.Models.Vehiculo
+@{
+    ViewData["Title"] = "Editar Vehículo";
+    var tipos = ViewBag.Tipos as List<string> ?? new List<string>();
+}
 
-<h2>Editar Vehículo</h2>
-
-<form asp-action="Editar" method="post">
-
-    <input type="hidden" asp-for="idVehiculo" />
-
-    <div class="mb-3">
-        <label class="form-label">Placa</label>
-        <input asp-for="placa" class="form-control" />
-        <span asp-validation-for="placa" class="text-danger"></span>
+<div class="card shadow-sm" style="max-width: 700px; margin: 0 auto;">
+    <div class="card-header text-white" style="background-color: #d4a017;">
+        <h5 class="mb-0">
+            <i class="fas fa-edit me-2"></i>@ViewData["Title"]
+        </h5>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Marca</label>
-        <input asp-for="marca" class="form-control" />
-        <span asp-validation-for="marca" class="text-danger"></span>
+    <div class="card-body">
+        <form asp-action="Editar" method="post">
+            <input type="hidden" asp-for="idVehiculo" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="placa" class="form-label"></label>
+                        <input asp-for="placa" class="form-control" placeholder="ABC-123" />
+                        <span asp-validation-for="placa" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="marca" class="form-label"></label>
+                        <input asp-for="marca" class="form-control" placeholder="Toyota" />
+                        <span asp-validation-for="marca" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="modelo" class="form-label"></label>
+                        <input asp-for="modelo" class="form-control" placeholder="Corolla" />
+                        <span asp-validation-for="modelo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="tipo" class="form-label"></label>
+                        <select asp-for="tipo" class="form-control">
+                            <option value="">Seleccione un tipo</option>
+                            @foreach (var tipo in tipos)
+                            {
+                                if (tipo == Model.tipo)
+                                {
+                                    <option value="@tipo" selected>@tipo</option>
+                                }
+                                else
+                                {
+                                    <option value="@tipo">@tipo</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="tipo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="anio" class="form-label"></label>
+                        <input asp-for="anio" class="form-control" placeholder="2023" />
+                        <span asp-validation-for="anio" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="kilometraje" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="kilometraje" class="form-control" placeholder="15000" />
+                            <span class="input-group-text">km</span>
+                        </div>
+                        <span asp-validation-for="kilometraje" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="estado" class="form-label"></label>
+                        <select asp-for="estado" class="form-control">
+                            <option value="Operativo">Operativo</option>
+                            <option value="En Taller">En Taller</option>
+                        </select>
+                        <span asp-validation-for="estado" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-warning px-4" style="background-color: #d4a017; border-color: #d4a017;">
+                        <i class="fas fa-save me-1"></i> Actualizar Vehículo
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                    </a>
+                </div>
+            </div>
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Modelo</label>
-        <input asp-for="modelo" class="form-control" />
-        <span asp-validation-for="modelo" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label>Año</label>
-        <input asp-for="anio" class="form-control" />
-        <span asp-validation-for="anio" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label>Kilometraje</label>
-        <input asp-for="kilometraje" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label>Estado</label>
-        <input asp-for="estado" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Actualizar</button>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-
-</form>
+</div>
 

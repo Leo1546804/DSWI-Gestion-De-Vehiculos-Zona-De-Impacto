@@ -21,7 +21,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<LoginRepository>();
 builder.Services.AddScoped<VehiculoRepository>();
-
+builder.Services.AddScoped<TipoGastoRepository>();
+builder.Services.AddScoped<MantenimientoRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

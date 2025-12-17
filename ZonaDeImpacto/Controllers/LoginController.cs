@@ -34,7 +34,7 @@ namespace ZonaDeImpacto.Controllers
                 ViewBag.Error = "Usuario desactivado";
                 return View();
             }
-
+            HttpContext.Session.SetInt32("idUsuario", user.idUsuario);
             HttpContext.Session.SetString("usuario", user.usuario);
             HttpContext.Session.SetString("nombre", user.nombreCompleto);
             HttpContext.Session.SetString("rol",user.rol);

@@ -1,36 +1,170 @@
-﻿@model IEnumerable<Usuario>
+﻿@model IEnumerable<ZonaDeImpacto.Models.Usuario>
 
-<h2>Lista de Usuarios</h2>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
 
-<p>
-    <a asp-action="Crear" class="btn btn-primary">+ Nuevo Usuario</a>
-</p>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre Completo</th>
-            <th>Usuario</th>
-            <th>Rol</th>
-            <th>Estado</th>
-        </tr>
-    </thead>
+<div class="card shadow-sm">
+    <!-- ENCABEZADO  -->
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>@ViewData["Title"]
+                </h5>
+            </div>
+            <div class="me-4">
+                <a asp-action="Crear" class="btn btn-success px-4">
+                    <i class="fas fa-user-plus me-1"></i>Agregar Nuevo Usuario
+                </a>
+            </div>
+        </div>
+    </div>
 
-    <tbody>
-        @foreach(var usuario in Model)
-        {       
-        <tr>
-            <td>@usuario.idUsuario</td>
-            <td>@usuario.nombreCompleto</td>
-            <td>@usuario.usuario</td>
-            <td>@usuario.rol</td>
-            <td>@usuario.estado</td>
-            <td>
-               <a asp-action="Editar" asp-route-id="@usuario.idUsuario"class="btn btn-warning btn-sm">Editar</a>
-                <a asp-action="Eliminar" asp-route-id="@usuario.idUsuario" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este usuario?');">Eliminar</a>
-            </td>
-        </tr>
-        }
-    </tbody>
-</table>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr class="table-primary">
+                        <th style="width: 25%;">Nombre Completo</th>
+                        <th style="width: 15%;">Usuario</th>
+                        <th style="width: 15%;">Rol</th>
+                        <th style="width: 10%;">Estado</th>
+                        <th style="width: 35%;" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usuario in Model)
+                    {
+                        <tr>
+                            <td>@usuario.nombreCompleto</td>
+                            <td>@usuario.usuario</td>
+                            <td>
+    @if (usuario.rol == "Admin" || usuario.rol == "Administrador")
+    {
+        <span class="badge-admin">Administrador</span>
+    }
+    else
+    {
+        <span class="badge-trabajador">Trabajador</span>
+    }
+</td>
+                            <td>
+                                @if (usuario.estado)
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <!-- Botón Editar -->
+                                    <a asp-action="Editar" asp-route-id="@usuario.idUsuario" class="btn btn-warning btn-sm" style="min-width: 80px;">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+
+                                    <!-- Botón Activar/Desactivar -->
+                                    @if (usuario.estado)
+                                    {
+                                        <a asp-action="CambiarEstado" asp-route-id="@usuario.idUsuario" class="btn btn-secondary btn-sm" style="min-width: 105px;"
+                                           onclick="return confirm('¿Estás seguro de desactivar este usuario?');">
+                                            <i class="fas fa-ban me-1"></i> Desactivar
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="CambiarEstado" asp-route-id="@usuario.idUsuario" class="btn btn-success btn-sm" style="min-width: 105px;"
+                                           onclick="return confirm('¿Estás seguro de activar este usuario?');">
+                                            <i class="fas fa-check me-1"></i> Activar
+                                        </a>
+                                    }
+
+                                    <!-- Botón Eliminar -->
+                                    <a asp-action="Eliminar" asp-route-id="@usuario.idUsuario" class="btn btn-danger btn-sm" style="min-width: 80px;"
+                                       onclick="return confirm('¿ESTÁS SEGURO? Esta acción eliminara permanentemente al usuario y no se podrá recuperar.');">
+                                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="fas fa-info-circle fa-lg text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No hay usuarios registrados</p>
+                                <a asp-action="Crear" class="btn btn-success mt-2">
+                                    <i class="fas fa-plus me-1"></i> Agregar el Primer Usuario
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-admin {
+        background-color: #5656a6;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .badge-trabajador {
+        background-color: #2ba1a1;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background-color: #1a237e;
+        color: white;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .d-flex.gap-2 {
+        gap: 10px !important;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    /* Asegurar que el botón no esté pegado a la derecha */
+    .card-header .d-flex {
+        padding: 0 10px;
+    }
+</style>

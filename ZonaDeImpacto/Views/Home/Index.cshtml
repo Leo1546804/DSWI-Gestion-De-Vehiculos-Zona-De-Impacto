@@ -1,8 +1,262 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
+    string rol = Context.Session.GetString("rol");
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+    <!-- Título simplificado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primario">
+            <i class="fas fa-home me-2"></i>Inicio
+        </h2>
+        <p class="text-muted mb-0">
+            <i class="fas fa-calendar me-1"></i> @DateTime.Now.ToString("dd/MM/yyyy")
+        </p>
+    </div>
+
+    @if (rol == "Admin")
+    {
+        <!-- Inicio para Administrador  -->
+        <!-- Fila 1: Usuarios, Vehículos, Mantenimientos -->
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Usuarios</h5>
+                        <p class="card-text">Gestión de usuarios del sistema</p>
+                        <a asp-controller="Usuario" asp-action="Index" class="btn btn-primario btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-car fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Vehículos</h5>
+                        <p class="card-text">Control de flota vehicular</p>
+                        <a asp-controller="Vehiculo" asp-action="Index" class="btn btn-success btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-tools fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Mantenimientos</h5>
+                        <p class="card-text">Registro de mantenimientos</p>
+                        <a asp-controller="Mantenimiento" asp-action="Index" class="btn btn-warning btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila 2: Tipos de Gasto, Gastos, Reportes (ORDEN CORREGIDO) -->
+        <div class="row mt-2">
+            <!-- PRIMERO: Tipos de Gasto -->
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-tags fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Tipos de Gasto</h5>
+                        <p class="card-text">Categorías de gastos</p>
+                        <a asp-controller="TipoGasto" asp-action="Index" class="btn btn-info btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEGUNDO: Gastos -->
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill-wave fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Gastos</h5>
+                        <p class="card-text">Control de gastos operativos</p>
+                        <a href="#" class="btn btn-danger btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TERCERO: Reportes -->
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-chart-bar fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">Reportes</h5>
+                        <p class="card-text">Estadísticas y reportes</p>
+                        <a href="#" class="btn btn-secondary btn-sm">
+                            Ver Reportes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a asp-controller="Usuario" asp-action="Crear" class="list-group-item list-group-item-action">
+                                <i class="fas fa-user-plus me-2 text-success"></i>Agregar Nuevo Usuario
+                            </a>
+                            <a asp-controller="Vehiculo" asp-action="Crear" class="list-group-item list-group-item-action">
+                                <i class="fas fa-car me-2 text-primary"></i>Registrar Nuevo Vehículo
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-file-alt me-2 text-info"></i>Generar Reporte Mensual
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle me-2"></i>Información del Sistema
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-check text-success me-2"></i>Sistema de gestión vehicular activo</p>
+                        <p><i class="fas fa-car text-primary me-2"></i>Control de mantenimientos preventivos</p>
+                        <p><i class="fas fa-chart-line text-info me-2"></i>Seguimiento de gastos operativos</p>
+                        <p><i class="fas fa-shield-alt text-warning me-2"></i>Gestión de usuarios por roles</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (rol == "Trabajador")
+    {
+        <!-- Inicio para Trabajador -->
+        <div class="row">
+            <!-- EXACTAMENTE los 4 items del menú -->
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-wrench fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Registrar Mantenimiento</h5>
+                        <p class="card-text">Registrar nuevo mantenimiento vehicular</p>
+                        <a href="#" class="btn btn-primario btn-sm">
+                            Registrar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill-wave fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Registrar Gasto</h5>
+                        <p class="card-text">Reportar gastos de mantenimiento</p>
+                        <a href="#" class="btn btn-success btn-sm">
+                            Registrar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-list fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Mis Mantenimientos</h5>
+                        <p class="card-text">Ver mantenimientos realizados</p>
+                        <a href="#" class="btn btn-warning btn-sm">
+                            Ver Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-file-invoice-dollar fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Mis Gastos Reportados</h5>
+                        <p class="card-text">Ver gastos reportados</p>
+                        <a href="#" class="btn btn-info btn-sm">
+                            Ver Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas trabajador -->
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-wrench me-2 text-primary"></i>Registrar Cambio de Aceite
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-car-battery me-2 text-success"></i>Reportar Problema Eléctrico
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Reportar Problema Mecánico
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-history me-2 text-info"></i>Ver Historial Completo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-clipboard-check me-2"></i>Instrucciones
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-check-circle text-success me-2"></i>Registra cada mantenimiento realizado</p>
+                        <p><i class="fas fa-check-circle text-success me-2"></i>Reporta gastos con sus comprobantes</p>
+                        <p><i class="fas fa-check-circle text-success me-2"></i>Consulta tu historial de actividades</p>
+                        <p><i class="fas fa-check-circle text-success me-2"></i>Mantén actualizado el estado de vehículos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Vista para usuarios no logueados -->
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <i class="fas fa-car fa-4x text-primary mb-4"></i>
+                        <h3 class="mb-3">Bienvenido a Zona de Impacto</h3>
+                        <p class="text-muted mb-4">Sistema de Gestión de Mantenimiento de Vehículos</p>
+                        <a asp-controller="Login" asp-action="Login" class="btn btn-primario btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
