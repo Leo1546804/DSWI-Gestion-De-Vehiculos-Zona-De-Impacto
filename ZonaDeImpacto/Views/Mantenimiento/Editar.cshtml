@@ -1,0 +1,96 @@
+﻿@model ZonaDeImpacto.Models.Mantenimiento
+@{
+    ViewData["Title"] = "Editar Mantenimiento";
+    var vehiculos = ViewBag.Vehiculos as List<Vehiculo> ?? new List<Vehiculo>();
+}
+
+<div class="card shadow-sm" style="max-width: 700px; margin: 0 auto;">
+    <div class="card-header text-white" style="background-color: #d4a017;">
+        <h5 class="mb-0">
+            <i class="fas fa-edit me-2"></i>@ViewData["Title"]
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form asp-action="Editar" method="post">
+            <input type="hidden" asp-for="idMantenimiento" />
+            <input type="hidden" asp-for="idUsuario" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="idVehiculo" class="form-label"></label>
+                        <select asp-for="idVehiculo" class="form-control" required>
+                            <option value="">Seleccione un vehículo</option>
+                            @foreach (var vehiculo in vehiculos)
+                            {
+                                if (vehiculo.idVehiculo == Model.idVehiculo)
+                                {
+                                    <option value="@vehiculo.idVehiculo" selected>
+                                        @vehiculo.placa - @vehiculo.marca @vehiculo.modelo
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@vehiculo.idVehiculo">
+                                        @vehiculo.placa - @vehiculo.marca @vehiculo.modelo
+                                    </option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="idVehiculo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="tipo" class="form-label"></label>
+                        <select asp-for="tipo" class="form-control" required>
+                            <option value="Preventivo">Preventivo</option>
+                            <option value="Correctivo">Correctivo</option>
+                        </select>
+                        <span asp-validation-for="tipo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="costo" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">S/.</span>
+                            <input asp-for="costo" class="form-control" placeholder="0.00" step="0.01" />
+                        </div>
+                        <span asp-validation-for="costo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="fecha" class="form-label"></label>
+                        <input asp-for="fecha" type="date" class="form-control"
+                               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="fecha" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="descripcion" class="form-label"></label>
+                        <textarea asp-for="descripcion" class="form-control" rows="4"
+                                  placeholder="Descripción del mantenimiento realizado..."></textarea>
+                        <span asp-validation-for="descripcion" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-warning px-4" style="background-color: #d4a017; border-color: #d4a017;">
+                        <i class="fas fa-save me-1"></i> Actualizar Mantenimiento
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -5,7 +5,7 @@ namespace ZonaDeImpacto.Filters
 {
     public class ValidarSesionAttribute : ActionFilterAttribute
     {
-        public override void OnActionExecuted(ActionExecutedContext context)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             // si es que no existe una sesion, redirigir al login
             if (context.HttpContext.Session.GetString("usuario") == null)
@@ -13,7 +13,7 @@ namespace ZonaDeImpacto.Filters
                 context.Result = new RedirectToActionResult("Login", "Login", null);
             }
 
-            base.OnActionExecuted(context);
+            base.OnActionExecuting(context);
         }
     }
 }

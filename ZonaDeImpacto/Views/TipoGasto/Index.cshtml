@@ -1,0 +1,125 @@
+﻿@model IEnumerable<ZonaDeImpacto.Models.TipoGasto>
+
+@{
+    ViewData["Title"] = "Tipos de Gasto";
+}
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex align-items-center">
+            <!-- Título normal (como antes) con ícono diferente -->
+            <div class="flex-grow-1">
+                <h5 class="mb-0">
+                    <!-- Volvemos a h5 normal -->
+                    <i class="fas fa-list-alt me-2"></i>@ViewData["Title"] <!-- Ícono diferente: list-alt -->
+                </h5>
+            </div>
+
+            <!-- Botón con buena separación e ícono diferente -->
+            <div class="me-4">
+                <!-- me-5 = 48px de margen -->
+                <a asp-action="Crear" class="btn btn-success px-4">
+                    <i class="fas fa-plus-circle me-1"></i> Agregar Tipo de Gasto <!-- Ícono: plus-circle -->
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr class="table-primary">
+                        <!-- Sin columna ID -->
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tipo in Model)
+                    {
+                        <tr>
+                            <!-- Sin ID -->
+                            <td><strong>@tipo.nombre</strong></td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(tipo.descripcion))
+                                {
+                                    <span class="text-muted">@tipo.descripcion</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Sin descripción</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <!-- Botón Editar -->
+                                    <a asp-action="Editar" asp-route-id="@tipo.idTipoGasto" class="btn btn-warning btn-sm" style="min-width: 80px;">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+
+                                    <!-- Botón Eliminar -->
+                                    <a asp-action="Eliminar" asp-route-id="@tipo.idTipoGasto" class="btn btn-danger btn-sm" style="min-width: 80px;"
+                                       onclick="return confirm('¿ESTÁS SEGURO? Esta acción eliminará permanentemente el tipo de gasto.');">
+                                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <!-- colspan 3 porque quitamos ID -->
+                            <td colspan="3" class="text-center py-4">
+                                <i class="fas fa-info-circle fa-lg text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No hay tipos de gasto registrados</p>
+                                <a asp-action="Crear" class="btn btn-success mt-2">
+                                    <i class="fas fa-plus-circle me-1"></i> Agregar el Primer Tipo de Gasto
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background-color: #1a237e;
+        color: white;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .d-flex.gap-2 {
+        gap: 10px !important;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+</style>

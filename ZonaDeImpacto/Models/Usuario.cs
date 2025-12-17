@@ -8,24 +8,24 @@ namespace ZonaDeImpacto.Models
         public int idUsuario { get; set; }
 
         [Required(ErrorMessage = "El nombre completo es obligatorio")]
+        [StringLength(100)]
         [Display(Name = "Nombre Completo")]
-        [StringLength(100, ErrorMessage = "El nombre no puede exceder los 100 caracteres")]
         public string nombreCompleto { get; set; }
 
         [Required(ErrorMessage = "El usuario es obligatorio")]
-        [Display(Name = "Nombre de Usuario")]
-        [StringLength(50, ErrorMessage = "El usuario no puede exceder los 50 caracteres")]
+        [StringLength(50)]
+        [Display(Name = "Usuario")]
         public string usuario { get; set; }
 
         [Display(Name = "Contraseña")]
-        [DataType(DataType.Password)]
-        [StringLength(255, ErrorMessage = "La contraseña no puede exceder los 50 caracteres")]
         public string password { get; set; }
+
         [Required(ErrorMessage = "El rol es obligatorio")]
-        [Display(Name = "Rol del Usuario")]
+        [StringLength(20)]
+        [Display(Name = "Rol")]
         public string rol { get; set; }
 
         [Display(Name = "Estado")]
-        public bool estado { get; set; }
+        public bool estado { get; set; } = true;
     }
 }

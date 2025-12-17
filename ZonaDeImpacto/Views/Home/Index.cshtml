@@ -1,6 +1,8 @@
 ﻿@{
-    ViewData["Title"] = "Inicio";
-    string rol = Context.Session.GetString("rol");
+    ViewData["Title"] = "Home Page";
+
+    // Obtener rol de la sesión
+    string rol = Context.Session.GetString("rol") ?? "";
 }
 
 <div class="container-fluid">
@@ -51,7 +53,7 @@
                         <i class="fas fa-tools fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Mantenimientos</h5>
                         <p class="card-text">Registro de mantenimientos</p>
-                        <a href="#" class="btn btn-warning btn-sm">
+                        <a asp-controller="Mantenimiento" asp-action="Index" class="btn btn-warning btn-sm">
                             Gestionar
                         </a>
                     </div>
@@ -59,8 +61,23 @@
             </div>
         </div>
 
-        <!-- Fila 2: Gastos, Tipos de Gasto, Reportes -->
+        <!-- Fila 2: Tipos de Gasto, Gastos, Reportes (ORDEN CORREGIDO) -->
         <div class="row mt-2">
+            <!-- PRIMERO: Tipos de Gasto -->
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-tags fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Tipos de Gasto</h5>
+                        <p class="card-text">Categorías de gastos</p>
+                        <a asp-controller="TipoGasto" asp-action="Index" class="btn btn-info btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEGUNDO: Gastos -->
             <div class="col-md-4 mb-4">
                 <div class="card text-center h-100">
                     <div class="card-body">
@@ -74,19 +91,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4 mb-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <i class="fas fa-tags fa-3x text-info mb-3"></i>
-                        <h5 class="card-title">Tipos de Gasto</h5>
-                        <p class="card-text">Categorías de gastos</p>
-                        <a href="#" class="btn btn-info btn-sm">
-                            Gestionar
-                        </a>
-                    </div>
-                </div>
-            </div>
-
+            <!-- TERCERO: Reportes -->
             <div class="col-md-4 mb-4">
                 <div class="card text-center h-100">
                     <div class="card-body">

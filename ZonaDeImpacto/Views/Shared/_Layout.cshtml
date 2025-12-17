@@ -258,13 +258,16 @@
                                        asp-controller="Vehiculo" asp-action="Index">
                                         <i class="fas fa-car me-2"></i> Vehículos
                                     </a>
-
-                                    <a class="sidebar-item" href="#">
-                                        <i class="fas fa-tags me-2"></i> Tipos de Gasto
+                                    <!-- MANTENIMIENTOS  -->
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Mantenimiento" ? "active" : "")"
+                                       asp-controller="Mantenimiento" asp-action="Index">
+                                        <i class="fas fa-tools me-2"></i> Mantenimientos
                                     </a>
 
-                                    <a class="sidebar-item" href="#">
-                                        <i class="fas fa-tools me-2"></i> Mantenimientos
+                                    <!-- TIPOS DE GASTO (después de Mantenimientos) -->
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "TipoGasto" ? "active" : "")"
+                                       asp-controller="TipoGasto" asp-action="Index">
+                                        <i class="fas fa-tags me-2"></i> Tipos de Gasto
                                     </a>
 
                                     <a class="sidebar-item" href="#">

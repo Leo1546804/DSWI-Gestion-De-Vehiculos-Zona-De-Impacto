@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using ZonaDeImpacto.Data;
 using ZonaDeImpacto.Filters;
 using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Controllers
 {
-    [ValidarAdmin]
     [ValidarSesion]
+    [ValidarAdmin]
     public class UsuarioController : Controller
     {
         private readonly UsuarioRepository _repo;
@@ -15,10 +16,30 @@ namespace ZonaDeImpacto.Controllers
             this._repo = _repo;
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string filtroNombre = null,
+            string filtroRol = null,
+            string filtroEstado = null)
         {
-            List<Usuario> lista = await _repo.ListarUsuariosAsync();
+            // Convertimos filtroEstado a int?
+            int? estadoFiltro = null;
+            if (filtroEstado == "activos") estadoFiltro = 1;
+            else if (filtroEstado == "inactivos") estadoFiltro = 0;
+
+            //Pasamos los filtros a la vista
+            ViewBag.FiltroNombre = filtroNombre;
+            ViewBag.FiltroRol = filtroRol;
+            ViewBag.FiltroEstado = filtroEstado;
+
+            //Obtenemos lista de roles unicos para el dropdown
+            var todosUsuarios = await _repo.ListarUsuariosAsync();
+            ViewBag.Roles = todosUsuarios.Select(u => u.rol).Distinct().ToList();
+
+            // Obtenemos usuarios filtrados
+                List<Usuario> lista = await _repo.ListarUsuariosAsync(
+                    filtroNombre, filtroRol, estadoFiltro);
             return View(lista);
         }
 
@@ -37,7 +58,6 @@ namespace ZonaDeImpacto.Controllers
             }
 
             await _repo.RegistrarUsuarioAsync(usuarioModelo);
-            TempData["Success"] = "Usuario creado correctamente";
             return RedirectToAction("Index");
         }
 
@@ -56,7 +76,6 @@ namespace ZonaDeImpacto.Controllers
         [HttpPost]
         public async Task<IActionResult> Editar(Usuario usuarioModelo)
         {
-            
             ModelState.Remove("password");
 
             if (!ModelState.IsValid)
@@ -64,53 +83,53 @@ namespace ZonaDeImpacto.Controllers
                 return View(usuarioModelo);
             }
 
-            // Obtener el usuario original de la base de datos
-            var usuarioOriginal = await _repo.ObtenerUsuarioAsync(usuarioModelo.idUsuario);
+            Usuario usuarioOriginal = await _repo.ObtenerUsuarioAsync(usuarioModelo.idUsuario);
 
-            if (usuarioOriginal == null)
+
+            if (string.IsNullOrWhiteSpace(usuarioModelo.password))
+            {
+                usuarioModelo.password = usuarioOriginal.password;
+            }
+
+            await _repo.EditarUsuarioAsync(usuarioModelo);
+            return RedirectToAction("Index");
+        }
+
+        // Desabilitamos al usuario
+        [HttpGet]
+        public async Task<IActionResult> Eliminar(int id, string filtroEstado = null)
+        {
+            await _repo.EliminarUsuarioAsync(id);
+            //Redirigimos manteniendo filtros
+            return RedirectToAction("Index", new
+            {
+                filtroEstado = filtroEstado
+            });
+        }
+
+        // Habilitamos al usuario
+        [HttpGet]
+        public async Task<IActionResult> Habilitar(int id, string filtroEstado = null)
+        {
+            await _repo.HabilitarUsuarioAsync(id);
+            //Redirigir manteniendo los filtros
+            return RedirectToAction("Index", new
+            {
+                filtroEstado = filtroEstado
+            });
+        }
+
+        // Detalles
+        [HttpGet]
+        public async Task<IActionResult> Detalles(int id)
+        {
+            Usuario usuario = await _repo.ObtenerUsuarioAsync(id);
+            if (usuario == null)
             {
                 return NotFound();
             }
-
-            // Manejar la contraseña:
-            // Si el campo password está vacío o nulo, mantener la contraseña original
-            // Si tiene valor, usar la nueva
-            if (string.IsNullOrWhiteSpace(usuarioModelo.password))
-            {
-                // Mantener la contraseña actual
-                usuarioModelo.password = usuarioOriginal.password;
-            }
-            // Si el campo tiene valor, se usa esa 
-            // Actualizar el usuario
-            await _repo.EditarUsuarioAsync(usuarioModelo);
-            TempData["Success"] = "Usuario actualizado correctamente";
-            return RedirectToAction("Index");
+            return View(usuario);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Eliminar(int id)
-        {
-            await _repo.EliminarUsuarioAsync(id);
-            TempData["Success"] = "Usuario eliminado permanentemente";
-            return RedirectToAction("Index");
-        }
-
-        /*   Metodo para activar/desactivar   */
-        [HttpGet]
-        public async Task<IActionResult> CambiarEstado(int id)
-        {
-            var usuario = await _repo.ObtenerUsuarioAsync(id);
-            if (usuario != null)
-            {
-                // Cambiar estado (true->false, false->true)
-                usuario.estado = !usuario.estado;
-                await _repo.EditarUsuarioAsync(usuario);
-
-                TempData["Success"] = usuario.estado ?
-                    "Usuario activado correctamente" :
-                    "Usuario desactivado correctamente";
-            }
-            return RedirectToAction("Index");
-        }
     }
 }

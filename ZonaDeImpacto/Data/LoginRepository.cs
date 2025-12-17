@@ -16,7 +16,7 @@ namespace ZonaDeImpacto.Data
         public async Task<Usuario> LoginAsync(string usuario, string password)
         {
             Usuario user = null;
-            using (SqlConnection conn= new SqlConnection(_connectionString))
+            using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand("sp_LoginUsuario", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -26,7 +26,7 @@ namespace ZonaDeImpacto.Data
                 await conn.OpenAsync();
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
                 {
-                    if(await dr.ReadAsync())
+                    if (await dr.ReadAsync())
                     {
                         user = new Usuario
                         {
