@@ -17,7 +17,7 @@ namespace ZonaDeImpacto.Data
         {
             Usuario user = null;
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_LoginUsuario", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_LoginUsuario", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@usuario", usuario);

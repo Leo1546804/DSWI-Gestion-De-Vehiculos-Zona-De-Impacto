@@ -1,5 +1,7 @@
 ﻿using System.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client;
 using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Data
@@ -12,15 +14,28 @@ namespace ZonaDeImpacto.Data
             _connectionString = configuration.GetConnectionString("conexion");
         }
 
-        //Listar
-        public async Task<List<Vehiculo>> ListarVehiculosAsync()
+        //Listar con filtros
+        public async Task<List<Vehiculo>> ListarVehiculosAsync(
+            string filtroPlaca = null,
+            string filtroMarca = null,
+            int? filtroAnio = null,
+            string filtroEstado = null,
+            bool? soloActivos = true)
         {
             List<Vehiculo> lista = new List<Vehiculo>();
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ListarVehiculos", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarVehiculos", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
+
+                //Agregamos parametros de filtros
+                cmd.Parameters.AddWithValue("@filtroPlaca", string.IsNullOrEmpty(filtroPlaca) ? (object)DBNull.Value : filtroPlaca);
+                cmd.Parameters.AddWithValue("@filtroMarca", string.IsNullOrEmpty(filtroMarca) ? (object)DBNull.Value : filtroMarca);
+                cmd.Parameters.AddWithValue("@filtroAnio", filtroAnio.HasValue ? (object)filtroAnio.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@filtroEstado", string.IsNullOrEmpty(filtroEstado) ? (object)DBNull.Value : filtroEstado);
+                cmd.Parameters.AddWithValue("@soloActivos", soloActivos.HasValue ? (object)soloActivos.Value : DBNull.Value);
+
                 await conn.OpenAsync();
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
@@ -36,7 +51,8 @@ namespace ZonaDeImpacto.Data
                             tipo = dr.IsDBNull(4) ? null : dr.GetString(4),
                             anio = dr.IsDBNull(5) ? null : dr.GetInt32(5),
                             kilometraje = dr.IsDBNull(6) ? null : dr.GetInt32(6),
-                            estado = dr.IsDBNull(7) ? null : dr.GetString(7)
+                            estado = dr.IsDBNull(7) ? null : dr.GetString(7),
+                            estadoLogico = dr.GetBoolean(8)
                         });
                     }
                 }
@@ -48,7 +64,7 @@ namespace ZonaDeImpacto.Data
         public async Task RegistrarVehiculoAsync(Vehiculo v)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_InsertarVehiculo", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_InsertarVehiculo", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -71,7 +87,7 @@ namespace ZonaDeImpacto.Data
             Vehiculo vehiculo = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ObtenerVehiculo", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ObtenerVehiculo", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idVehiculo", id);
@@ -91,7 +107,8 @@ namespace ZonaDeImpacto.Data
                             tipo = dr.IsDBNull(4) ? null : dr.GetString(4),
                             anio = dr.IsDBNull(5) ? null : dr.GetInt32(5),
                             kilometraje = dr.IsDBNull(6) ? null : dr.GetInt32(6),
-                            estado = dr.IsDBNull(7) ? null : dr.GetString(7)
+                            estado = dr.IsDBNull(7) ? null : dr.GetString(7),
+                            estadoLogico = dr.GetBoolean(8)
                         };
                     }
                 }
@@ -103,7 +120,7 @@ namespace ZonaDeImpacto.Data
         public async Task EditarVehiculoAsync(Vehiculo v)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EditarVehiculo", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_EditarVehiculo", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -125,7 +142,7 @@ namespace ZonaDeImpacto.Data
         public async Task EliminarVehiculoAsync(int idVehiculo)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EliminarVehiculo", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_EliminarVehiculo", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idVehiculo", idVehiculo);
@@ -155,6 +172,34 @@ namespace ZonaDeImpacto.Data
                 "SUV",
                 "TodoTerreno"
             };
+        }
+
+        //Metodo para habilitar
+        public async Task HabilitarVehiculoAsync(int idVehiculo)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+                using (SqlCommand cmd = new SqlCommand("dbo.usp_HabilitarVehiculo", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@idVehiculo", idVehiculo);
+
+                await conn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
+        //Obtener marcas para filtro
+        public async Task<List<string>> ObtenerMarcasAsync()
+        {
+            var vehiculos = await ListarVehiculosAsync(soloActivos: null);
+            return vehiculos.Select(v => v.marca).Distinct().OrderBy(m=>m).ToList();
+        }
+
+        //Obtener estados para filtro
+        public async Task<List<string>> ObtenerEstadosAsync()
+        {
+            var vehiculos = await ListarVehiculosAsync(soloActivos: null);
+            return vehiculos.Where(v => !string.IsNullOrEmpty(v.estado)).Select(v => v.estado).Distinct().OrderBy(e =>e).ToList();
         }
     }
 }

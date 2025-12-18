@@ -36,8 +36,11 @@ namespace ZonaDeImpacto.Models
         public int? kilometraje { get; set; }
 
         [StringLength(20)]
-        [Display(Name = "Estado")]
+        [Display(Name = "Estado del Vehiculo")]
         public string estado { get; set; }
+
+        [Display(Name = "Estado General")]
+        public bool estadoLogico { get; set; } = true; // true = Activo, false = Eliminado
 
     }
 }

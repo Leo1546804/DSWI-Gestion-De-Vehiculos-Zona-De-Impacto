@@ -20,7 +20,7 @@ namespace ZonaDeImpacto.Data
             List<Mantenimiento> lista = new List<Mantenimiento>();
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ListarMantenimientos", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarMantenimientos", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 await conn.OpenAsync();

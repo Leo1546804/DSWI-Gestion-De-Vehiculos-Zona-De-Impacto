@@ -19,7 +19,7 @@ namespace ZonaDeImpacto.Data
             List<TipoGasto> lista = new List<TipoGasto>();
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ListarTiposGasto", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarTiposGasto", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 await conn.OpenAsync();
@@ -44,7 +44,7 @@ namespace ZonaDeImpacto.Data
         public async Task RegistrarTipoGastoAsync(TipoGasto tipoGasto)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_InsertarTipoGasto", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_InsertarTipoGasto", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -62,7 +62,7 @@ namespace ZonaDeImpacto.Data
             TipoGasto tipoGasto = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ObtenerTipoGasto", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ObtenerTipoGasto", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idTipoGasto", id);
@@ -90,7 +90,7 @@ namespace ZonaDeImpacto.Data
         public async Task EditarTipoGastoAsync(TipoGasto tipoGasto)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EditarTipoGasto", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_EditarTipoGasto", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -107,7 +107,7 @@ namespace ZonaDeImpacto.Data
         public async Task EliminarTipoGastoAsync(int idTipoGasto)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EliminarTipoGasto", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_EliminarTipoGasto", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idTipoGasto", idTipoGasto);
