@@ -24,6 +24,7 @@ builder.Services.AddScoped<VehiculoRepository>();
 
 builder.Services.AddScoped<TipoGastoRepository>();
 builder.Services.AddScoped<MantenimientoRepository>();
+builder.Services.AddScoped<GastoRepository>();
 
 var app = builder.Build();
 

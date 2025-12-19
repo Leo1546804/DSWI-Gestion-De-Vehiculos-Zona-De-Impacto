@@ -1,0 +1,102 @@
+﻿@model ZonaDeImpacto.Models.Gasto
+@{
+    ViewData["Title"] = "Registrar Gasto";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <h5 class="mb-0">
+            <i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form asp-action="Crear" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row">
+                <!-- Columna Izquierda -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="idMantenimiento" class="form-label">Mantenimiento *</label>
+                        <select asp-for="idMantenimiento" class="form-select" required>
+                            <option value="">Seleccione un mantenimiento</option>
+                            @foreach (var mantenimiento in ViewBag.Mantenimientos)
+                            {
+                                <option value="@mantenimiento.idMantenimiento">
+                                    @mantenimiento.codigoMantenimiento - @mantenimiento.placa (@mantenimiento.usuarioNombre)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="idMantenimiento" class="text-danger"></span>
+                        <small class="form-text text-muted">Seleccione el mantenimiento asociado</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="idTipoGasto" class="form-label">Tipo de Gasto *</label>
+                        <select asp-for="idTipoGasto" class="form-select" required>
+                            <option value="">Seleccione un tipo</option>
+                            @foreach (var tipo in ViewBag.TiposGasto)
+                            {
+                                <option value="@tipo.idTipoGasto">@tipo.nombre</option>
+                            }
+                        </select>
+                        <span asp-validation-for="idTipoGasto" class="text-danger"></span>
+                        <small class="form-text text-muted">Seleccione el tipo de gasto</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="monto" class="form-label">Monto *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">S/</span>
+                            <input asp-for="monto" type="number" step="0.01" min="0.01" class="form-control" required />
+                        </div>
+                        <span asp-validation-for="monto" class="text-danger"></span>
+                        <small class="form-text text-muted">Ingrese el monto del gasto</small>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="fecha" class="form-label">Fecha *</label>
+                        <input asp-for="fecha" type="date" class="form-control" required />
+                        <span asp-validation-for="fecha" class="text-danger"></span>
+                        <small class="form-text text-muted">Fecha del gasto</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="descripcion" class="form-label">Descripción</label>
+                        <textarea asp-for="descripcion" class="form-control" rows="4"
+                                  placeholder="Describa el gasto realizado..."></textarea>
+                        <span asp-validation-for="descripcion" class="text-danger"></span>
+                        <small class="form-text text-muted">Opcional: detalles del gasto</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-1"></i> Registrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -6,6 +6,8 @@ namespace ZonaDeImpacto.Models
     {
         public int idMantenimiento { get; set; }
 
+        public string? codigoMantenimiento { get; set; }
+
         [Required(ErrorMessage = "El Vehiculo es obligatorio")]
         [Display(Name = "Vehículo")]
         public int idVehiculo { get; set; }
@@ -18,11 +20,6 @@ namespace ZonaDeImpacto.Models
         [Display(Name = "Descripción")]
         public string descripcion { get; set; }
 
-        [Required(ErrorMessage = "El costo es obligatorio")]
-        [Range(0.01, 9999999.99, ErrorMessage = "El costo debe ser mayor a 0")]
-        [Display(Name = "Monto Total")]
-        public decimal costo { get; set; }
-
         [Required(ErrorMessage = "La fecha es obligatoria")]
         [Display(Name = "Fecha")]
         [DataType(DataType.Date)]
@@ -30,7 +27,7 @@ namespace ZonaDeImpacto.Models
 
         [Required(ErrorMessage = "El usuario es obligatorio")]
         [Display(Name = "Usuario")]
-        public int idUsuario { get; set; }
+        public int? idUsuario { get; set; }
 
         //PROPÍEDADES DE LA INFORMACION RELACIONADA
         [Display(Name = "Placa")]
@@ -47,6 +44,8 @@ namespace ZonaDeImpacto.Models
 
         [Display(Name = "Usuario")]
         public string? usuarioNombre { get; set; }
+
+        public bool estadoLogico { get; set; } = true;
 
     }
 }

@@ -270,11 +270,14 @@
                                         <i class="fas fa-tags me-2"></i> Tipos de Gasto
                                     </a>
 
-                                    <a class="sidebar-item" href="#">
+                                    <!-- GASTOS -->
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Gasto" ? "active" : "")"
+                                       asp-controller="Gasto" asp-action="Index">
                                         <i class="fas fa-money-bill-wave me-2"></i> Gastos
                                     </a>
 
-                                    <a class="sidebar-item" href="#">
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reporte" ? "active" : "")"
+                                       asp-controller="Reporte" asp-action="Index">
                                         <i class="fas fa-chart-bar me-2"></i> Reportes
                                     </a>
                                 }
