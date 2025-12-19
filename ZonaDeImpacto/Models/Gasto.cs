@@ -22,7 +22,7 @@ namespace ZonaDeImpacto.Models
         [Required(ErrorMessage = "La fecha es obligatoria")]
         [Display(Name = "Fecha")]
         [DataType(DataType.Date)]
-        public DateTime fecha { get; set; }
+        public DateTime fecha { get; set; } = DateTime.Today;
 
         [StringLength(200, ErrorMessage = "La descripción no puede exceder los 200 caracteres")]
         [Display(Name = "Descripción")]

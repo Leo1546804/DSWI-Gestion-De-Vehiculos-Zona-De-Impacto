@@ -284,19 +284,23 @@
 
                                 @if (rol == "Trabajador")
                                 {
-                                    <a class="sidebar-item" href="#">
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Mantenimiento" && ViewContext.RouteData.Values["Action"]?.ToString() == "Crear" ? "active" : "")"
+                                       asp-controller="Mantenimiento" asp-action="Crear">
                                         <i class="fas fa-wrench me-2"></i> Registrar Mantenimiento
                                     </a>
 
-                                    <a class="sidebar-item" href="#">
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Gasto" && ViewContext.RouteData.Values["Action"]?.ToString() == "Crear" ? "active" : "")"
+                                       asp-controller="Gasto" asp-action="Crear">
                                         <i class="fas fa-money-bill-wave me-2"></i> Registrar Gasto
                                     </a>
 
-                                    <a class="sidebar-item" href="#">
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Mantenimiento" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")"
+                                       asp-controller="Mantenimiento" asp-action="Index">
                                         <i class="fas fa-list me-2"></i> Mis Mantenimientos
                                     </a>
 
-                                    <a class="sidebar-item" href="#">
+                                    <a class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Gasto" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")"
+                                       asp-controller="Gasto" asp-action="Index">
                                         <i class="fas fa-file-invoice-dollar me-2"></i> Mis Gastos Reportados
                                     </a>
                                 }

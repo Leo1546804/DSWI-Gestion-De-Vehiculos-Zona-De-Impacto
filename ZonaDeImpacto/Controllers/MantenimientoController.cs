@@ -63,14 +63,25 @@ namespace ZonaDeImpacto.Controllers
         // Crear - GET
         public async Task<IActionResult> Crear()
         {
-            // Asegúrate de cargar estos datos
-            ViewBag.Vehiculos = await _repo.ObtenerVehiculosAsync();
-            ViewBag.Usuarios = await _repo.ObtenerUsuariosAsync();
-            ViewBag.Tipos = _repo.ObtenerTiposMantenimiento();
-
-            // Rol para la vista
+            // Obtener rol e ID de usuario
             var rol = HttpContext.Session.GetString("rol");
+            var idUsuario = HttpContext.Session.GetInt32("idUsuario");
+            var nombreUsuario = HttpContext.Session.GetString("nombre");
+
+            ViewBag.Vehiculos = await _repo.ObtenerVehiculosAsync();
+            ViewBag.Tipos = _repo.ObtenerTiposMantenimiento();
             ViewBag.Rol = rol;
+
+            // Pasar datos del usuario para la vista
+            if (rol == "Trabajador")
+            {
+                ViewBag.IdUsuario = idUsuario;
+                ViewBag.NombreUsuario = nombreUsuario;
+            }
+            else
+            {
+                ViewBag.Usuarios = await _repo.ObtenerUsuariosAsync();
+            }
 
             return View();
         }
@@ -79,45 +90,36 @@ namespace ZonaDeImpacto.Controllers
         [HttpPost]
         public async Task<IActionResult> Crear(Mantenimiento mantenimiento)
         {
-            // Verifica si hay errores de validación
+            var rol = HttpContext.Session.GetString("rol");
+
             if (!ModelState.IsValid)
             {
-                // Recargar los datos necesarios para la vista
+                // Recargar datos 
                 ViewBag.Vehiculos = await _repo.ObtenerVehiculosAsync();
                 ViewBag.Usuarios = await _repo.ObtenerUsuariosAsync();
                 ViewBag.Tipos = _repo.ObtenerTiposMantenimiento();
-
-                // Obtener rol de sesión
-                var rol = HttpContext.Session.GetString("rol");
                 ViewBag.Rol = rol;
-
-                // Mostrar errores de validación
                 TempData["Error"] = "Por favor corrija los errores del formulario.";
                 return View(mantenimiento);
             }
 
             try
             {
-                // Intentar guardar
                 await _repo.RegistrarMantenimientoAsync(mantenimiento);
-
-                // Si todo sale bien, redirigir
                 TempData["Mensaje"] = "Mantenimiento registrado correctamente.";
-                return RedirectToAction("Index");
+
+                // Redirigir según rol
+                return rol == "Trabajador"
+                    ? RedirectToAction("Index", "Home")  // Trabajador => Home
+                    : RedirectToAction("Index");         // Admin =z Index de Mantenimientos
             }
             catch (Exception ex)
             {
-                // Si hay error al guardar, mostrar mensaje
                 TempData["Error"] = $"Error al guardar: {ex.Message}";
-
-                // Recargar datos para la vista
                 ViewBag.Vehiculos = await _repo.ObtenerVehiculosAsync();
                 ViewBag.Usuarios = await _repo.ObtenerUsuariosAsync();
                 ViewBag.Tipos = _repo.ObtenerTiposMantenimiento();
-
-                var rol = HttpContext.Session.GetString("rol");
                 ViewBag.Rol = rol;
-
                 return View(mantenimiento);
             }
         }

@@ -55,25 +55,40 @@ namespace ZonaDeImpacto.Controllers
 
             return View(lista);
         }
-
         // Crear - GET
         public async Task<IActionResult> Crear()
         {
-            ViewBag.Mantenimientos = await _repo.ObtenerMantenimientosAsync();
+            var rol = HttpContext.Session.GetString("rol");
+            var idUsuario = HttpContext.Session.GetInt32("idUsuario");
+
+            // IF para rol
+            if (rol == "Trabajador" && idUsuario.HasValue)
+            {
+                // Usar el nuevo método para trabajador
+                ViewBag.Mantenimientos = await _repo.ObtenerMantenimientosPorTrabajadorAsync(idUsuario.Value);
+            }
+            else
+            {
+                // Admin sigue usando el método normal
+                ViewBag.Mantenimientos = await _repo.ObtenerMantenimientosAsync();
+            }
+
             ViewBag.TiposGasto = await _repo.ObtenerTiposGastoAsync();
-            ViewBag.Rol = HttpContext.Session.GetString("rol");
+            ViewBag.Rol = rol;
             return View();
         }
 
-        // Crear - POST
+        // Crear - POST 
         [HttpPost]
         public async Task<IActionResult> Crear(Gasto gasto)
         {
+            var rol = HttpContext.Session.GetString("rol");
+
             if (!ModelState.IsValid)
             {
                 ViewBag.Mantenimientos = await _repo.ObtenerMantenimientosAsync();
                 ViewBag.TiposGasto = await _repo.ObtenerTiposGastoAsync();
-                ViewBag.Rol = HttpContext.Session.GetString("rol");
+                ViewBag.Rol = rol;
                 return View(gasto);
             }
 
@@ -81,14 +96,18 @@ namespace ZonaDeImpacto.Controllers
             {
                 await _repo.RegistrarGastoAsync(gasto);
                 TempData["Mensaje"] = "Gasto registrado correctamente.";
-                return RedirectToAction("Index");
+
+                // Redirigir según rol
+                return rol == "Trabajador"
+                    ? RedirectToAction("Index", "Home")
+                    : RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Error al registrar: {ex.Message}";
                 ViewBag.Mantenimientos = await _repo.ObtenerMantenimientosAsync();
                 ViewBag.TiposGasto = await _repo.ObtenerTiposGastoAsync();
-                ViewBag.Rol = HttpContext.Session.GetString("rol");
+                ViewBag.Rol = rol;
                 return View(gasto);
             }
         }

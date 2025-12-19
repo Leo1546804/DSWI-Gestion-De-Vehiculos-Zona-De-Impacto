@@ -113,18 +113,22 @@
                     <div class="card-header">
                         <i class="fas fa-bolt me-2"></i>Acciones Rápidas
                     </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <a asp-controller="Usuario" asp-action="Crear" class="list-group-item list-group-item-action">
-                                <i class="fas fa-user-plus me-2 text-success"></i>Agregar Nuevo Usuario
-                            </a>
-                            <a asp-controller="Vehiculo" asp-action="Crear" class="list-group-item list-group-item-action">
-                                <i class="fas fa-car me-2 text-primary"></i>Registrar Nuevo Vehículo
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="fas fa-file-alt me-2 text-info"></i>Generar Reporte Mensual
-                            </a>
-                        </div>
+                    <div class="list-group">
+                        <a asp-controller="Usuario" asp-action="Crear" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-plus me-2 text-success"></i>Agregar Nuevo Usuario
+                        </a>
+                        <a asp-controller="Vehiculo" asp-action="Crear" class="list-group-item list-group-item-action">
+                            <i class="fas fa-car me-2 text-primary"></i>Registrar Nuevo Vehículo
+                        </a>
+                        <a asp-controller="Mantenimiento" asp-action="Crear" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tools me-2 text-warning"></i>Registrar Mantenimiento
+                        </a>
+                        <a asp-controller="Gasto" asp-action="Crear" class="list-group-item list-group-item-action">
+                            <i class="fas fa-money-bill-wave me-2 text-danger"></i>Registrar Gasto
+                        </a>
+                        <a asp-controller="Reporte" asp-action="Index" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-alt me-2 text-secondary"></i>Ver Reportes
+                        </a>
                     </div>
                 </div>
             </div>
@@ -155,7 +159,7 @@
                         <i class="fas fa-wrench fa-3x text-primary mb-3"></i>
                         <h5 class="card-title">Registrar Mantenimiento</h5>
                         <p class="card-text">Registrar nuevo mantenimiento vehicular</p>
-                        <a href="#" class="btn btn-primario btn-sm">
+                        <a asp-controller="Mantenimiento" asp-action="Crear" class="btn btn-primario btn-sm">
                             Registrar
                         </a>
                     </div>
@@ -168,7 +172,7 @@
                         <i class="fas fa-money-bill-wave fa-3x text-success mb-3"></i>
                         <h5 class="card-title">Registrar Gasto</h5>
                         <p class="card-text">Reportar gastos de mantenimiento</p>
-                        <a href="#" class="btn btn-success btn-sm">
+                        <a asp-controller="Gasto" asp-action="Crear" class="btn btn-success btn-sm">
                             Registrar
                         </a>
                     </div>
@@ -181,7 +185,7 @@
                         <i class="fas fa-list fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Mis Mantenimientos</h5>
                         <p class="card-text">Ver mantenimientos realizados</p>
-                        <a href="#" class="btn btn-warning btn-sm">
+                        <a asp-controller="Mantenimiento" asp-action="Index" class="btn btn-warning btn-sm">
                             Ver Lista
                         </a>
                     </div>
@@ -194,7 +198,7 @@
                         <i class="fas fa-file-invoice-dollar fa-3x text-info mb-3"></i>
                         <h5 class="card-title">Mis Gastos Reportados</h5>
                         <p class="card-text">Ver gastos reportados</p>
-                        <a href="#" class="btn btn-info btn-sm">
+                        <a asp-controller="Gasto" asp-action="Index" class="btn btn-info btn-sm">
                             Ver Lista
                         </a>
                     </div>
@@ -211,17 +215,17 @@
                     </div>
                     <div class="card-body">
                         <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="fas fa-wrench me-2 text-primary"></i>Registrar Cambio de Aceite
+                            <a asp-controller="Mantenimiento" asp-action="Crear" class="list-group-item list-group-item-action">
+                                <i class="fas fa-wrench me-2 text-primary"></i>Registrar Nuevo Mantenimiento
                             </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="fas fa-car-battery me-2 text-success"></i>Reportar Problema Eléctrico
+                            <a asp-controller="Gasto" asp-action="Crear" class="list-group-item list-group-item-action">
+                                <i class="fas fa-money-bill-wave me-2 text-success"></i>Reportar Nuevo Gasto
                             </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Reportar Problema Mecánico
+                            <a asp-controller="Mantenimiento" asp-action="Index" class="list-group-item list-group-item-action">
+                                <i class="fas fa-history me-2 text-warning"></i>Ver Mis Mantenimientos
                             </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="fas fa-history me-2 text-info"></i>Ver Historial Completo
+                            <a asp-controller="Gasto" asp-action="Index" class="list-group-item list-group-item-action">
+                                <i class="fas fa-chart-bar me-2 text-info"></i>Ver Mis Gastos
                             </a>
                         </div>
                     </div>

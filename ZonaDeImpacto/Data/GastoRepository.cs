@@ -238,5 +238,47 @@ namespace ZonaDeImpacto.Data
                 await cmd.ExecuteNonQueryAsync();
             }
         }
+       // para el drop de trabajador
+        public async Task<List<Mantenimiento>> ObtenerMantenimientosPorTrabajadorAsync(int idUsuario)
+        {
+            List<Mantenimiento> lista = new List<Mantenimiento>();
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            SELECT 
+                m.idMantenimiento,
+                m.codigoMantenimiento,
+                v.placa,
+                u.nombreCompleto AS responsable
+            FROM Mantenimientos m
+            INNER JOIN Vehiculos v ON m.idVehiculo = v.idVehiculo
+            INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
+            WHERE m.estadoLogico = 1
+            AND m.idUsuario = @idUsuario
+            ORDER BY m.codigoMantenimiento DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+                    await conn.OpenAsync();
+
+                    using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await dr.ReadAsync())
+                        {
+                            lista.Add(new Mantenimiento
+                            {
+                                idMantenimiento = dr.GetInt32(0),
+                                codigoMantenimiento = dr.GetString(1),
+                                placa = dr.GetString(2),
+                                usuarioNombre = dr.GetString(3)
+                            });
+                        }
+                    }
+                }
+            }
+            return lista;
+        }
     }
 }

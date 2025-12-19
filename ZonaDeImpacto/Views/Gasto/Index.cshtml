@@ -27,14 +27,26 @@
                 <i class="fas fa-money-bill-wave fa-2x me-3"></i>
                 <div>
                     <h5 class="mb-0">@ViewData["Title"]</h5>
-                    <small class="opacity-75">Control de gastos operativos</small>
+                    <small class="opacity-75">
+                        @if (ViewBag.Rol == "Trabajador")
+                        {
+                            <span>Mis gastos reportados</span>
+                        }
+                        else
+                        {
+                            <span>Control de gastos operativos</span>
+                        }
+                    </small>
                 </div>
             </div>
-            <div>
-                <a asp-action="Crear" class="btn btn-success px-4">
-                    <i class="fas fa-money-bill-wave me-1"></i> Nuevo Gasto
-                </a>
-            </div>
+            @if (ViewBag.Rol != "Trabajador")
+            {
+                <div>
+                    <a asp-action="Crear" class="btn btn-success px-4">
+                        <i class="fas fa-money-bill-wave me-1"></i> Nuevo Gasto
+                    </a>
+                </div>
+            }
         </div>
     </div>
 

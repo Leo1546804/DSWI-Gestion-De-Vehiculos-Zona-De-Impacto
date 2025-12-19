@@ -37,7 +37,6 @@
         }
 
         <form asp-action="Crear" method="post">
-            <!-- NO DEBE HABER CAMPO PARA codigoMantenimiento -->
 
             <div class="row">
                 <!-- Columna Izquierda -->
@@ -83,18 +82,32 @@
                         <span asp-validation-for="descripcion" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="idUsuario" class="form-label">Responsable *</label>
-                        <select asp-for="idUsuario" class="form-select" required>
-                            <option value="">Seleccione un responsable</option>
-                            @foreach (var usuario in ViewBag.Usuarios)
-                            {
-                                <option value="@usuario.idUsuario">@usuario.nombreCompleto (@usuario.rol)</option>
-                            }
-                        </select>
-                        <span asp-validation-for="idUsuario" class="text-danger"></span>
-                        <small class="form-text text-muted">Seleccione el usuario responsable</small>
-                    </div>
+                    @if (ViewBag.Rol == "Trabajador")
+                    {
+                        <!-- Para Trabajador: Campo oculto con su ID y nombre mostrado -->
+                        <input type="hidden" asp-for="idUsuario" value="@ViewBag.IdUsuario" />
+                        <div class="mb-3">
+                            <label class="form-label">Responsable *</label>
+                            <input type="text" class="form-control" value="@ViewBag.NombreUsuario (Trabajador)" readonly />
+                            <small class="form-text text-muted">Usted será registrado como responsable</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Para Admin: Dropdown normal -->
+                        <div class="mb-3">
+                            <label asp-for="idUsuario" class="form-label">Responsable *</label>
+                            <select asp-for="idUsuario" class="form-select" required>
+                                <option value="">Seleccione un responsable</option>
+                                @foreach (var usuario in ViewBag.Usuarios)
+                                {
+                                    <option value="@usuario.idUsuario">@usuario.nombreCompleto (@usuario.rol)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="idUsuario" class="text-danger"></span>
+                            <small class="form-text text-muted">Seleccione el usuario responsable</small>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -103,9 +116,18 @@
                     <button type="submit" class="btn btn-primary px-4">
                         <i class="fas fa-save me-1"></i> Registrar
                     </button>
-                    <a asp-action="Index" class="btn btn-secondary px-4">
-                        <i class="fas fa-arrow-left me-1"></i> Volver
-                    </a>
+                    @if (ViewBag.Rol == "Trabajador")
+                    {
+                        <a asp-action="Index" asp-controller="Home" class="btn btn-secondary px-4">
+                            <i class="fas fa-arrow-left me-1"></i> Volver al Inicio
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" class="btn btn-secondary px-4">
+                            <i class="fas fa-arrow-left me-1"></i> Volver
+                        </a>
+                    }
                 </div>
             </div>
         </form>
