@@ -12,8 +12,12 @@ namespace ZonaDeImpacto.Models
         public string nombre { get; set; }
 
         [StringLength(200, ErrorMessage = "La descripcion no puede exceder de 200 caracteres")]
-        [Display(Name = "Descripción")]
+        [Display(Name = "Descripcion")]
         public string descripcion { get; set; }
+
+        //Agregamos el atributo estado para la eliminacion logico
+        [Display(Name = "Estado")]
+        public bool estadoLogico { get; set; } = true; // lo dejamos por defecto activo
 
     }
 }

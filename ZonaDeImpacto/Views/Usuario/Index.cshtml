@@ -14,32 +14,32 @@
 <div class="card shadow-sm">
     <!-- ENCABEZADO -->
     <div class="card-header text-white" style="background-color: #1a237e;">
-        <div class="d-flex align-items-center">
-            <div class="flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
                 <h5 class="mb-0">
                     <i class="fas fa-users me-2"></i>@ViewData["Title"]
                 </h5>
             </div>
             <div>
                 <a asp-action="Crear" class="btn btn-success px-4">
-                    <i class="fas fa-user-plus me-1"></i>Agregar Nuevo Usuario
+                    <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- SECCIÓN DE FILTROS -->
+    <!-- SECCIÓN DE FILTROS - DISTRIBUCIÓN COMO VEHÍCULOS -->
     <div class="card-body border-bottom py-3">
         <form method="get" class="row align-items-end">
-            <!-- FILTRO POR USUARIO -->
-            <div class="col-md-3 col-lg-4">
+            <!-- FILTRO 1: Buscar Usuario (col-md-2 col-lg-2) -->
+            <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Buscar usuario:</label>
                 <input type="text" name="filtroNombre" class="form-control form-control-sm"
                        placeholder="Ej: sergio" value="@ViewBag.FiltroNombre" />
             </div>
 
-            <!-- FILTRO POR ROL -->
-            <div class="col-md-3 col-lg-2">
+            <!-- FILTRO 2: Rol (col-md-2 col-lg-2) -->
+            <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Rol:</label>
                 <select name="filtroRol" class="form-select form-select-sm">
                     <option value="">Todos</option>
@@ -52,8 +52,8 @@
                 </select>
             </div>
 
-            <!-- FILTRO POR ESTADO -->
-            <div class="col-md-3 col-lg-2">
+            <!-- FILTRO 3: Estado (col-md-2 col-lg-2) -->
+            <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Estado:</label>
                 <select name="filtroEstado" class="form-select form-select-sm">
                     <option value="">Todos</option>
@@ -66,8 +66,18 @@
                 </select>
             </div>
 
-            <!-- BOTÓN LIMPIAR -->
+            <!-- FILTRO 4: VACÍO (col-md-2 col-lg-2 - posición de Estado Vehículo) -->
             <div class="col-md-2 col-lg-2">
+                <!-- Espacio para mantener distribución -->
+            </div>
+
+            <!-- FILTRO 5: VACÍO (col-md-1 col-lg-1 - posición de Año) -->
+            <div class="col-md-1 col-lg-1">
+                <!-- Espacio pequeño para mantener distribución -->
+            </div>
+
+            <!-- BOTÓN LIMPIAR (col-md-1 col-lg-1 - IGUAL QUE VEHÍCULOS) -->
+            <div class="col-md-1 col-lg-1">
                 @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) ||
                                 !string.IsNullOrEmpty(ViewBag.FiltroRol) ||
                                 !string.IsNullOrEmpty(ViewBag.FiltroEstado))
@@ -82,8 +92,8 @@
                 }
             </div>
 
-            <!-- BOTÓN FILTRAR -->
-            <div class="col-md-1 col-lg-2">
+            <!-- BOTÓN FILTRAR (col-md-1 col-lg-1 - IGUAL QUE VEHÍCULOS) -->
+            <div class="col-md-1 col-lg-1">
                 <button type="submit" class="btn btn-sm w-100 py-1"
                         style="background-color: #283593; border-color: #283593; color: white;">
                     <i class="fas fa-filter me-1"></i> Filtrar
@@ -98,11 +108,11 @@
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 25%;">Nombre Completo</th>
-                        <th style="width: 15%;">Usuario</th>
-                        <th style="width: 15%;">Rol</th>
-                        <th style="width: 10%;">Estado</th>
-                        <th style="width: 35%;" class="text-center">Acciones</th>
+                        <th>Nombre Completo</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,13 +144,17 @@
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     <!-- Botón Detalles -->
-                                    <a href="@Url.Action("Detalles", new { id = usuario.idUsuario })"
+                                    <a asp-action="Detalles"
+                                       asp-route-id="@usuario.idUsuario"
+                                       asp-route-filtroEstado="@ViewBag.FiltroEstado"
                                        class="btn btn-info btn-sm" style="min-width: 90px;">
                                         <i class="fas fa-eye me-1"></i> Detalles
                                     </a>
 
                                     <!-- Botón Editar -->
-                                    <a asp-action="Editar" asp-route-id="@usuario.idUsuario"
+                                    <a asp-action="Editar"
+                                       asp-route-id="@usuario.idUsuario"
+                                       asp-route-filtroEstado="@ViewBag.FiltroEstado"
                                        class="btn btn-warning btn-sm" style="min-width: 90px;">
                                         <i class="fas fa-edit me-1"></i> Editar
                                     </a>
@@ -199,7 +213,7 @@
                                 else
                                 {
                                     <a asp-action="Crear" class="btn btn-success btn-sm mt-2">
-                                        <i class="fas fa-plus me-1"></i> Agregar el Primer Usuario
+                                        <i class="fas fa-plus me-1"></i> Agregar Primer Usuario
                                     </a>
                                 }
                             </td>
@@ -274,7 +288,11 @@
         border-bottom: 1px solid rgba(0,0,0,.125);
     }
 
-    .w-100 {
+    /* ESTA REGLA ES LA CLAVE PARA BOTONES IGUALES A VEHÍCULOS */
+    .col-md-1.col-lg-1 .btn-sm {
         min-height: 33px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>

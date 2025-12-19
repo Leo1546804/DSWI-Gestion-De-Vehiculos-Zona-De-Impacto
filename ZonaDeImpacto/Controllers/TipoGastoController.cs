@@ -17,10 +17,18 @@ namespace ZonaDeImpacto.Controllers
             _repo = repo;
         }
 
-        // Listar tipos de gasto
-        public async Task<IActionResult> Index()
+        // Listar tipos de gasto con filtros
+        [HttpGet]
+        public async Task<IActionResult> Index(
+            string filtroNombre = null,
+            string filtroEstado ="")
         {
-            var lista = await _repo.ListarTiposGastoAsync();
+            //Pasamos los filtros a la vista
+            ViewBag.FiltroNombre = filtroNombre;
+            ViewBag.FiltroEstado = filtroEstado;
+
+            //obtenemos la lista filtrada
+            var lista = await _repo.ListarTiposGastoAsync(filtroNombre, filtroEstado);
             return View(lista);
         }
 
@@ -44,36 +52,58 @@ namespace ZonaDeImpacto.Controllers
         }
 
         // Editar - GET
-        public async Task<IActionResult> Editar(int id)
+        public async Task<IActionResult> Editar(int id, string filtroEstado ="")
         {
             var tipoGasto = await _repo.ObtenerTipoGastoAsync(id);
             if (tipoGasto == null) return NotFound();
 
+            //Pasamos el filtro actual
+            ViewBag.FiltroEstado = filtroEstado;
             return View(tipoGasto);
         }
 
         // Editar - POST
         [HttpPost]
-        public async Task<IActionResult> Editar(TipoGasto tipoGasto)
+        public async Task<IActionResult> Editar(TipoGasto tipoGasto, string filtroEstado ="")
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.FiltroEstado = filtroEstado;
                 return View(tipoGasto);
             }
 
             await _repo.EditarTipoGastoAsync(tipoGasto);
             TempData["Mensaje"] = "El tipo de gasto a sido actualizado correctamente.";
-            return RedirectToAction("Index");
+
+            // Redirigimos manteniendo el filtro
+            return RedirectToAction("Index", new {filtroEstado = filtroEstado});
         }
 
-        // Detalles???
-
-        // Eliminar
-        public async Task<IActionResult> Eliminar(int id)
+        // Eliminar o desactivamos
+        public async Task<IActionResult> Eliminar(int id, string filtroEstado = null)
         {
             await _repo.EliminarTipoGastoAsync(id);
-            TempData["Mensaje"] = "El tipo de gasto a sido eliminado correctamente";
-            return RedirectToAction("Index");
+            TempData["Mensaje"] = "El tipo de gasto a sido eliminado/desactivado correctamente";
+            return RedirectToAction("Index", new {filtroEstado = filtroEstado});
+        }
+
+        //Habilitamos o reactivamos
+        [HttpGet]
+        public async Task<IActionResult> Habilitar(int id, string filtroEstado = null)
+        {
+            await _repo.HabilitarTipoGastoAsync(id);
+            TempData["Mensaje"] = "El tipo de gasto a sido habilitado correctamente.";
+
+            return RedirectToAction("Index", new {filtroEstado=filtroEstado});
+        }
+        //Porsiacaso detalles
+        public async Task<IActionResult> Detalles(int id, string filtroEstado="")
+        {
+            var tipoGasto = await _repo.ObtenerTipoGastoAsync(id);
+            if (tipoGasto == null) return NotFound();
+
+            ViewBag.FiltroEstado = filtroEstado;
+            return View(tipoGasto);
         }
     }
 }

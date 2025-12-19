@@ -2,7 +2,6 @@
 using ZonaDeImpacto.Data;
 using ZonaDeImpacto.Filters;
 using ZonaDeImpacto.Models;
-using ZonaDeImpacto.Filters;
 using System.Runtime.CompilerServices;
 
 namespace ZonaDeImpacto.Controllers

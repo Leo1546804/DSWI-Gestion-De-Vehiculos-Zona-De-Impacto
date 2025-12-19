@@ -13,6 +13,7 @@
     <div class="card-body">
         <form asp-action="Editar" method="post">
             <input type="hidden" asp-for="idTipoGasto" />
+            <input type="hidden" name="filtroEstado" value="@ViewBag.FiltroEstado" />
 
             <div class="row">
                 <div class="col-md-12">
@@ -34,10 +35,10 @@
             <div class="mt-4 pt-3 border-top">
                 <div class="d-flex justify-content-center gap-3">
                     <button type="submit" class="btn btn-warning px-4" style="background-color: #d4a017; border-color: #d4a017;">
-                        <i class="fas fa-save me-1"></i> Actualizar Tipo
+                        <i class="fas fa-save me-1"></i> Actualizar
                     </button>
-                    <a asp-action="Index" class="btn btn-secondary px-4">
-                        <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                    <a asp-action="Index" asp-route-filtroEstado="@ViewBag.FiltroEstado" class="btn btn-secondary px-4">
+                        <i class="fas fa-arrow-left me-1"></i> Volver
                     </a>
                 </div>
             </div>

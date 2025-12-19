@@ -1,0 +1,145 @@
+﻿@model ZonaDeImpacto.Models.TipoGasto
+@{
+    ViewData["Title"] = "Detalles del Tipo de Gasto";
+}
+
+<div class="card shadow-sm" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header text-white" style="background-color: #17a2b8;">
+        <h5 class="mb-0">
+            <i class="fas fa-tag me-2"></i>@ViewData["Title"]
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <!-- Información del tipo de gasto -->
+            <div class="col-12">
+                <div class="card border-0">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3" style="color: #1a237e !important;">
+                                    <i class="fas fa-info-circle me-2"></i>Información del Tipo de Gasto
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Nombre:</label>
+                                    <span class="detail-value">
+                                        <span class="badge bg-dark fs-6 px-3 py-2">@Model.nombre</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Estado:</label>
+                                    <span class="detail-value">
+                                        @if (Model.estadoLogico)
+                                        {
+                                            <span class="badge bg-primary px-3 py-2">
+                                                <i class="fas fa-check me-1"></i> Activo
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary px-3 py-2">
+                                                <i class="fas fa-times me-1"></i> Inactivo
+                                            </span>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <div class="detail-item">
+                                    <label class="detail-label">Descripción:</label>
+                                    <div class="detail-value">
+                                        @if (!string.IsNullOrEmpty(Model.descripcion))
+                                        {
+                                            <div class="border rounded p-3 bg-light">
+                                                @Model.descripcion
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Sin descripción</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top">
+            <div class="d-flex justify-content-center gap-3">
+                <a asp-action="Editar"
+                   asp-route-id="@Model.idTipoGasto"
+                   asp-route-filtroEstado="@ViewBag.FiltroEstado"
+                   class="btn btn-warning px-4">
+                    <i class="fas fa-edit me-1"></i> Editar Tipo
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-filtroEstado="@ViewBag.FiltroEstado"
+                   class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-item {
+        padding: 8px 0;
+    }
+
+    .detail-label {
+        display: block;
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 3px;
+    }
+
+    .detail-value {
+        display: block;
+        font-size: 15px;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    h6.text-primary {
+        color: #1a237e !important;
+        font-weight: 600;
+        border-bottom: 2px solid #1a237e;
+        padding-bottom: 8px;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .btn {
+        min-width: 150px;
+    }
+
+    .badge.bg-dark {
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+    }
+</style>
