@@ -1,0 +1,120 @@
+﻿@model List<ZonaDeImpacto.Models.Reportes.ReporteCostosVehiculo>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Reporte de Costos por Vehículo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        h1 {
+            color: #1a237e;
+            text-align: center;
+        }
+
+        .fecha {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: #1a237e;
+            color: white;
+            padding: 8px;
+            text-align: left;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .total {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+
+        .text-danger {
+            color: red;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reporte de Costos por Vehículo</h1>
+    <div class="fecha">
+        Período: @ViewBag.FechaInicio al @ViewBag.FechaFin<br>
+        Generado: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+    </div>
+
+    @if (Model.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Vehículo</th>
+                    <th class="text-center">Tipo</th>
+                    <th class="text-center">Mantenimientos</th>
+                    <th class="text-end">Gasto Total</th>
+                    <th class="text-end">Preventivo</th>
+                    <th class="text-end">Correctivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderByDescending(x => x.totalGastado))
+                {
+                    <tr>
+                        <td>@item.placa<br><small>@item.marca @item.modelo</small></td>
+                        <td class="text-center">@(item.tipoVehiculo ?? "N/A")</td>
+                        <td class="text-center">@item.totalMantenimientos</td>
+                        <td class="text-end text-danger">S/ @item.totalGastado.ToString("N2")</td>
+                        <td class="text-end">S/ @item.gastoPreventivo.ToString("N2")</td>
+                        <td class="text-end">S/ @item.gastoCorrectivo.ToString("N2")</td>
+                    </tr>
+                }
+                <tr class="total">
+                    <td colspan="3" class="text-end"><strong>TOTALES:</strong></td>
+                    <td class="text-end text-danger"><strong>S/ @Model.Sum(x => x.totalGastado).ToString("N2")</strong></td>
+                    <td class="text-end"><strong>S/ @Model.Sum(x => x.gastoPreventivo).ToString("N2")</strong></td>
+                    <td class="text-end"><strong>S/ @Model.Sum(x => x.gastoCorrectivo).ToString("N2")</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            Sistema de Gestión de Mantenimiento de Vehículos - Zona de Impacto
+        </div>
+    }
+    else
+    {
+        <p>No hay datos para mostrar en el período seleccionado.</p>
+    }
+</body>
+</html>

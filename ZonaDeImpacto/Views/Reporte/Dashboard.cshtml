@@ -1,45 +1,306 @@
-﻿<div class="row">
-    <!-- Card 1: Costos Totales -->
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h6>Total Gastado</h6>
-                <h3>S/ 25,430.50</h3>
-                <small>Últimos 30 días</small>
+﻿@model ZonaDeImpacto.Models.Reportes.ReporteDashboard
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-tachometer-alt fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0">@ViewData["Title"] - @Model.mes/@Model.anio</h5>
+                    <small class="opacity-75">Resumen ejecutivo del sistema</small>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Card 2: Vehículos más costosos -->
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <h6>Vehículo Más Costoso</h6>
-                <h5>ABC-101 (Toyota)</h5>
-                <small>S/ 8,240.00 en mantenimiento</small>
+    <!-- FILTROS -->
+    <div class="card-body border-bottom py-3">
+        <form method="post" action="@Url.Action("DashboardPost")" class="row align-items-end">
+            <!-- FILTRO MES -->
+            <div class="col-md-3 col-lg-3">
+                <label class="form-label mb-1">Mes:</label>
+                <select name="mes" class="form-select form-select-sm">
+                    <option value="1" selected="@(Model.mes == 1)">Enero</option>
+                    <option value="2" selected="@(Model.mes == 2)">Febrero</option>
+                    <option value="3" selected="@(Model.mes == 3)">Marzo</option>
+                    <option value="4" selected="@(Model.mes == 4)">Abril</option>
+                    <option value="5" selected="@(Model.mes == 5)">Mayo</option>
+                    <option value="6" selected="@(Model.mes == 6)">Junio</option>
+                    <option value="7" selected="@(Model.mes == 7)">Julio</option>
+                    <option value="8" selected="@(Model.mes == 8)">Agosto</option>
+                    <option value="9" selected="@(Model.mes == 9)">Septiembre</option>
+                    <option value="10" selected="@(Model.mes == 10)">Octubre</option>
+                    <option value="11" selected="@(Model.mes == 11)">Noviembre</option>
+                    <option value="12" selected="@(Model.mes == 12)">Diciembre</option>
+                </select>
             </div>
-        </div>
+
+            <!-- FILTRO AÑO -->
+            <div class="col-md-3 col-lg-3">
+                <label class="form-label mb-1">Año:</label>
+                <select name="anio" class="form-select form-select-sm">
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        int a = DateTime.Now.Year - i;
+                        <option value="@a" selected="@(Model.anio == a)">@a</option>
+                    }
+                </select>
+            </div>
+
+            <!-- ESPACIO VACÍO -->
+            <div class="col-md-4 col-lg-4"></div>
+
+            <!-- BOTÓN ACTUALIZAR -->
+            <div class="col-md-2 col-lg-2">
+                <button type="submit" class="btn btn-sm w-100 py-1"
+                        style="background-color: #283593; border-color: #283593; color: white;">
+                    <i class="fas fa-sync-alt me-1"></i> Actualizar
+                </button>
+            </div>
+        </form>
     </div>
 
-    <!-- Card 3: Tipo de gasto principal -->
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <h6>Gasto Principal</h6>
-                <h5>Repuestos Mecánicos</h5>
-                <small>42% del total</small>
+    <!-- RESUMEN PRINCIPAL -->
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill-wave fa-2x text-primary mb-2"></i>
+                        <h5 class="card-title text-muted">Gasto Total</h5>
+                        <h3 class="text-danger">S/ @Model.totalGastadoMes.ToString("N2")</h3>
+                        <p class="text-muted small">Mes de @Model.mes/@Model.anio</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-tools fa-2x text-success mb-2"></i>
+                        <h5 class="card-title text-muted">Mantenimientos</h5>
+                        @{
+                            var totalMantenimientos = Model.tiposMantenimiento.Sum(t => t.cantidad);
+                            var totalPreventivos = Model.tiposMantenimiento.FirstOrDefault(t => t.tipoMantenimiento == "Preventivo")?.cantidad ?? 0;
+                            var totalCorrectivos = Model.tiposMantenimiento.FirstOrDefault(t => t.tipoMantenimiento == "Correctivo")?.cantidad ?? 0;
+                        }
+                        <h3>@totalMantenimientos</h3>
+                        <p class="text-muted small">
+                            @totalPreventivos Preventivos / @totalCorrectivos Correctivos
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-car fa-2x text-info mb-2"></i>
+                        <h5 class="card-title text-muted">Vehículos Activos</h5>
+                        @{
+                            var totalVehiculos = Model.estadosVehiculos.Sum(e => e.cantidad);
+                            var vehiculosOperativos = Model.estadosVehiculos.FirstOrDefault(e => e.estado == "Operativo")?.cantidad ?? 0;
+                        }
+                        <h3>@totalVehiculos</h3>
+                        <p class="text-muted small">@vehiculosOperativos Operativos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title text-muted">Promedio por Mant.</h5>
+                        @{
+                            var promedio = totalMantenimientos > 0 ? Model.totalGastadoMes / totalMantenimientos : 0;
+                        }
+                        <h3>S/ @promedio.ToString("N2")</h3>
+                        <p class="text-muted small">Gasto promedio</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Card 4: Mantenimientos Pendientes -->
-    <div class="col-md-3">
-        <div class="card bg-danger text-white">
-            <div class="card-body">
-                <h6>Mantenimientos Vencidos</h6>
-                <h3>3</h3>
-                <small>Preventivos pendientes</small>
+        <!-- TRES TABLAS EN UNA FILA -->
+        <div class="row">
+            <!-- Top 3 Vehículos -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header text-white" style="background-color: #1a237e;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-car me-2"></i>Top 3 Vehículos
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    @foreach (var vehiculo in Model.topVehiculos)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>@vehiculo.placa</strong>
+                                                    <div class="text-muted small">@vehiculo.marca @vehiculo.modelo</div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end text-danger fw-bold">
+                                                S/ @vehiculo.totalGastado.ToString("N2")
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if (!Model.topVehiculos.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted py-3">
+                                                No hay datos
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estados de Vehículos -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header text-white" style="background-color: #1a237e;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Vehículos por Estado
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    @foreach (var estado in Model.estadosVehiculos)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @estado.estado
+                                            </td>
+                                            <td class="text-end">
+                                                @estado.cantidad
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if (!Model.estadosVehiculos.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted py-3">
+                                                No hay datos
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipos de Mantenimiento -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header text-white" style="background-color: #1a237e;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Gastos por Tipo
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    @foreach (var tipo in Model.tiposMantenimiento)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @tipo.tipoMantenimiento
+                                            </td>
+                                            <td class="text-center">@tipo.cantidad</td>
+                                            <td class="text-end text-danger fw-bold">
+                                                S/ @tipo.total.ToString("N2")
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if (!Model.tiposMantenimiento.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-3">
+                                                No hay datos
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        color: #495057;
+    }
+
+    .form-select-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        height: calc(1.5em + 0.5rem + 2px);
+    }
+</style>

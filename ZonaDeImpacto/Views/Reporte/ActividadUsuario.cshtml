@@ -1,0 +1,268 @@
+﻿@model ZonaDeImpacto.Models.Reportes.ReporteActividadUsuario
+@{
+    ViewData["Title"] = "Actividad por Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-user-check fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0">@ViewData["Title"]</h5>
+                    <small class="opacity-75">Reporte de mantenimientos y gastos por usuario</small>
+                </div>
+            </div>
+            <div>
+                    <a href="@Url.Action("ExportarActividadCSV", new { 
+                     fechaInicio = ViewBag.FechaInicio, 
+                     fechaFin = ViewBag.FechaFin,
+                     idUsuario = Model.UsuarioSeleccionadoId
+                        })" class="btn btn-success px-3">
+                    <i class="fas fa-file-excel me-1"></i> Exportar CSV
+                    </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="card-body border-bottom py-3">
+        <form method="post" action="@Url.Action("ActividadUsuarioPost")" class="row align-items-end">
+            <!-- FECHA INICIO -->
+            <div class="col-md-3 col-lg-3">
+                <label class="form-label mb-1">Fecha Inicio:</label>
+                <input type="date" name="fechaInicio" class="form-control form-control-sm"
+                       value="@ViewBag.FechaInicio" required>
+            </div>
+
+            <!-- FECHA FIN -->
+            <div class="col-md-3 col-lg-3">
+                <label class="form-label mb-1">Fecha Fin:</label>
+                <input type="date" name="fechaFin" class="form-control form-control-sm"
+                       value="@ViewBag.FechaFin" required>
+            </div>
+
+            <!-- USUARIO -->
+            <div class="col-md-4 col-lg-4">
+                <label class="form-label mb-1">Usuario:</label>
+                <select name="idUsuario" class="form-select form-select-sm">
+                    <option value="">-- Todos los usuarios --</option>
+                    @if (ViewBag.Usuarios != null)
+                    {
+                        foreach (var usuario in ViewBag.Usuarios)
+                        {
+                            <option value="@usuario.idUsuario"
+                                    selected="@(usuario.idUsuario == Model.UsuarioSeleccionadoId)">
+                                @usuario.nombreCompleto (@usuario.rol)
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- BOTÓN LIMPIAR -->
+            <div class="col-md-1 col-lg-1">
+                @if (!string.IsNullOrEmpty(ViewBag.FechaInicio) || 
+                     !string.IsNullOrEmpty(ViewBag.FechaFin) || 
+                     Model.UsuarioSeleccionadoId.HasValue)
+                {
+                    <a href="@Url.Action("ActividadUsuario")" class="btn btn-outline-secondary btn-sm w-100 py-1">
+                        <i class="fas fa-times me-1"></i> Limpiar
+                    </a>
+                }
+            </div>
+
+            <!-- BOTÓN FILTRAR -->
+            <div class="col-md-1 col-lg-1">
+                <button type="submit" class="btn btn-sm w-100 py-1"
+                        style="background-color: #283593; border-color: #283593; color: white;">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="card-body">
+        @if (Model.Usuarios.Any())
+        {
+            <!-- TABLA DE USUARIOS -->
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th class="text-center">Rol</th>
+                            <th class="text-center">Vehículos</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Preventivos</th>
+                            <th class="text-center">Correctivos</th>
+                            <th class="text-end">Gasto Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var usuario in Model.Usuarios.OrderByDescending(u => u.totalGastado))
+                        {
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>@usuario.nombreCompleto</strong>
+                                        <div class="text-muted small">@usuario.usuario</div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @usuario.rol
+                                </td>
+                                <td class="text-center">
+                                    @usuario.vehiculosAtendidos
+                                </td>
+                                <td class="text-center">
+                                    @usuario.totalMantenimientos
+                                </td>
+                                <td class="text-center">
+                                    @usuario.mantenimientosPreventivos
+                                </td>
+                                <td class="text-center">
+                                    @usuario.mantenimientosCorrectivos
+                                </td>
+                                <td class="text-end fw-bold text-danger">
+                                    S/ @usuario.totalGastado.ToString("N2")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr style="background-color: #e3f2fd;">
+                            <td colspan="3" class="text-end fw-bold">TOTALES:</td>
+                            <td class="text-center fw-bold">@Model.Usuarios.Sum(u => u.totalMantenimientos)</td>
+                            <td class="text-center fw-bold">@Model.Usuarios.Sum(u => u.mantenimientosPreventivos)</td>
+                            <td class="text-center fw-bold">@Model.Usuarios.Sum(u => u.mantenimientosCorrectivos)</td>
+                            <td class="text-end fw-bold text-danger">
+                                S/ @Model.Usuarios.Sum(u => u.totalGastado).ToString("N2")
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- DETALLE DE MANTENIMIENTOS (si se seleccionó un usuario) -->
+            @if (Model.UsuarioSeleccionadoId.HasValue && Model.DetalleMantenimientos.Any())
+            {
+                var usuarioSeleccionado = Model.Usuarios.FirstOrDefault(u => u.idUsuario == Model.UsuarioSeleccionadoId);
+                
+                <div class="card mt-4">
+                    <div class="card-header text-white" style="background-color: #1a237e;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tools me-2"></i>
+                            Detalle de Mantenimientos: @Model.UsuarioSeleccionadoNombre
+                            <span class="badge bg-light text-dark ms-2">@Model.DetalleMantenimientos.Count</span>
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Vehículo</th>
+                                        <th>Tipo</th>
+                                        <th>Descripción</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var mantenimiento in Model.DetalleMantenimientos)
+                                    {
+                                        <tr>
+                                            <td>@mantenimiento.fecha.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <strong>@mantenimiento.placa</strong><br>
+                                                <small>@mantenimiento.marca @mantenimiento.modelo</small>
+                                            </td>
+                                            <td>
+                                                @mantenimiento.tipoMantenimiento
+                                            </td>
+                                            <td>
+                                                @(string.IsNullOrEmpty(mantenimiento.descripcion) ? "Sin descripción" : mantenimiento.descripcion)
+                                            </td>
+                                            <td class="text-end fw-bold text-danger">
+                                                S/ @mantenimiento.totalMantenimiento.ToString("N2")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <td colspan="4" class="text-end fw-bold">Total:</td>
+                                        <td class="text-end fw-bold text-danger">
+                                            S/ @Model.DetalleMantenimientos.Sum(m => m.totalMantenimiento).ToString("N2")
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                <p class="text-muted mb-0">No hay datos para mostrar</p>
+                <p class="text-muted small">Seleccione un período para generar el reporte</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background-color: #1a237e;
+        color: white;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        color: #495057;
+    }
+
+    .form-control-sm, .form-select-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        height: calc(1.5em + 0.5rem + 2px);
+    }
+</style>
