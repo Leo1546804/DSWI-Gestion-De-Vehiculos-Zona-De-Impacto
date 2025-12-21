@@ -14,8 +14,10 @@ namespace ZonaDeImpacto.Data
             _connectionString = configuration.GetConnectionString("conexion");
         }
 
-        //Listar con filtros
-        public async Task<List<Vehiculo>> ListarVehiculosAsync(
+        //Listar con filtros Y PAGINACIÓN
+        public async Task<(List<Vehiculo> Vehiculos, int TotalRegistros)> ListarVehiculosPaginadoAsync(
+            int pagina = 1,
+            int tamanoPagina = 6,
             string filtroPlaca = null,
             string filtroMarca = null,
             int? filtroAnio = null,
@@ -23,11 +25,16 @@ namespace ZonaDeImpacto.Data
             bool? soloActivos = true)
         {
             List<Vehiculo> lista = new List<Vehiculo>();
+            int totalRegistros = 0;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarVehiculos", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarVehiculosPaginado", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
+
+                // Parámetros de paginación
+                cmd.Parameters.AddWithValue("@Pagina", pagina);
+                cmd.Parameters.AddWithValue("@TamanoPagina", tamanoPagina);
 
                 //Agregamos parametros de filtros
                 cmd.Parameters.AddWithValue("@filtroPlaca", string.IsNullOrEmpty(filtroPlaca) ? (object)DBNull.Value : filtroPlaca);
@@ -35,6 +42,13 @@ namespace ZonaDeImpacto.Data
                 cmd.Parameters.AddWithValue("@filtroAnio", filtroAnio.HasValue ? (object)filtroAnio.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("@filtroEstado", string.IsNullOrEmpty(filtroEstado) ? (object)DBNull.Value : filtroEstado);
                 cmd.Parameters.AddWithValue("@soloActivos", soloActivos.HasValue ? (object)soloActivos.Value : DBNull.Value);
+
+                // Parámetro de salida para total de registros
+                SqlParameter totalRegistrosParam = new SqlParameter("@TotalRegistros", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(totalRegistrosParam);
 
                 await conn.OpenAsync();
 
@@ -56,8 +70,33 @@ namespace ZonaDeImpacto.Data
                         });
                     }
                 }
+
+                // Obtener el valor del parámetro de salida
+                totalRegistros = totalRegistrosParam.Value != DBNull.Value ? (int)totalRegistrosParam.Value : 0;
             }
-            return lista;
+
+            return (lista, totalRegistros);
+        }
+
+        //Listar con filtros (sin paginación - para compatibilidad)
+        public async Task<List<Vehiculo>> ListarVehiculosAsync(
+            string filtroPlaca = null,
+            string filtroMarca = null,
+            int? filtroAnio = null,
+            string filtroEstado = null,
+            bool? soloActivos = true)
+        {
+            // Usar paginación con tamaño máximo para simular "todos"
+            var (vehiculos, _) = await ListarVehiculosPaginadoAsync(
+                pagina: 1,
+                tamanoPagina: int.MaxValue,
+                filtroPlaca: filtroPlaca,
+                filtroMarca: filtroMarca,
+                filtroAnio: filtroAnio,
+                filtroEstado: filtroEstado,
+                soloActivos: soloActivos);
+
+            return vehiculos;
         }
 
         //Registar
@@ -178,7 +217,7 @@ namespace ZonaDeImpacto.Data
         public async Task HabilitarVehiculoAsync(int idVehiculo)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
-                using (SqlCommand cmd = new SqlCommand("dbo.usp_HabilitarVehiculo", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_HabilitarVehiculo", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idVehiculo", idVehiculo);
@@ -192,14 +231,14 @@ namespace ZonaDeImpacto.Data
         public async Task<List<string>> ObtenerMarcasAsync()
         {
             var vehiculos = await ListarVehiculosAsync(soloActivos: null);
-            return vehiculos.Select(v => v.marca).Distinct().OrderBy(m=>m).ToList();
+            return vehiculos.Select(v => v.marca).Distinct().OrderBy(m => m).ToList();
         }
 
         //Obtener estados para filtro
         public async Task<List<string>> ObtenerEstadosAsync()
         {
             var vehiculos = await ListarVehiculosAsync(soloActivos: null);
-            return vehiculos.Where(v => !string.IsNullOrEmpty(v.estado)).Select(v => v.estado).Distinct().OrderBy(e =>e).ToList();
+            return vehiculos.Where(v => !string.IsNullOrEmpty(v.estado)).Select(v => v.estado).Distinct().OrderBy(e => e).ToList();
         }
     }
 }
