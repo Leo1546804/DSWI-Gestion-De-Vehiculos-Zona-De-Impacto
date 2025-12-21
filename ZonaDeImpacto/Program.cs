@@ -16,8 +16,6 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 
-
-
 // Registrar repositorio en el ADO.NET
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<LoginRepository>();
@@ -53,7 +51,6 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Login}/{id?}");
-
 
 
 app.Run();
