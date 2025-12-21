@@ -31,7 +31,6 @@ namespace ZonaDeImpacto.Data
                 estadoFiltro = true;
             else if (filtroEstado == "anulados")
                 estadoFiltro = false;
-            // else = null (muestra todos)
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarMantenimientos", conn))
@@ -131,7 +130,6 @@ namespace ZonaDeImpacto.Data
             }
             catch (Exception ex)
             {
-                // Loguear el error
                 Console.WriteLine($"Error en RegistrarMantenimientoAsync: {ex.Message}");
                 throw; // Re-lanzar la excepción
             }
