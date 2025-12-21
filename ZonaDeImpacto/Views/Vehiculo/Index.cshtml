@@ -1,0 +1,354 @@
+﻿@model IEnumerable<ZonaDeImpacto.Models.Vehiculo>
+@{
+    ViewData["Title"] = "Gestión de Vehículos";
+}
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="fas fa-car me-2"></i>@ViewData["Title"]
+                </h5>
+            </div>
+            <div>
+                <a asp-action="Crear" class="btn btn-success px-4">
+                    <i class="fas fa-plus me-1"></i> Nuevo Vehículo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE FILTROS - UNA SOLA FILA -->
+    <div class="card-body border-bottom py-3">
+        <form method="get" class="row align-items-end">
+            <!-- FILTRO POR PLACA -->
+            <div class="col-md-2 col-lg-2">
+                <label class="form-label mb-1">Placa:</label>
+                <input type="text" name="filtroPlaca" class="form-control form-control-sm"
+                       placeholder="Ej: ABC123" value="@ViewBag.FiltroPlaca" />
+            </div>
+
+            <!-- FILTRO POR MARCA -->
+            <div class="col-md-2 col-lg-2">
+                <label class="form-label mb-1">Marca:</label>
+                <select name="filtroMarca" class="form-select form-select-sm">
+                    <option value="">Todas</option>
+                    @if (ViewBag.Marcas != null)
+                    {
+                        @foreach (var marca in ViewBag.Marcas)
+                        {
+                            bool estaSeleccionada = ViewBag.FiltroMarca == marca;
+                            <option value="@marca" selected="@estaSeleccionada">
+                                @marca
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- FILTRO POR AÑO -->
+            <div class="col-md-1 col-lg-1">
+                <label class="form-label mb-1">Año:</label>
+                <input type="number" name="filtroAnio" class="form-control form-control-sm"
+                       placeholder="2023" value="@ViewBag.FiltroAnio" />
+            </div>
+
+            <!-- FILTRO POR ESTADO DEL VEHÍCULO -->
+            <div class="col-md-2 col-lg-2">
+                <label class="form-label mb-1">Estado Vehículo:</label>
+                <select name="filtroEstado" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="Operativo" selected="@(ViewBag.FiltroEstado == "Operativo")">Operativo</option>
+                    <option value="En Taller" selected="@(ViewBag.FiltroEstado == "En Taller")">En Taller</option>
+                    <option value="Inoperativo" selected="@(ViewBag.FiltroEstado == "Inoperativo")">Inoperativo</option>
+                </select>
+            </div>
+
+            <!-- FILTRO POR ESTADO GENERAL -->
+            <div class="col-md-2 col-lg-2">
+                <label class="form-label mb-1">Estado General:</label>
+                <select name="filtroEstadoLogico" class="form-select form-select-sm">
+                    <option value="" selected="@(string.IsNullOrEmpty(ViewBag.FiltroEstadoLogico))">Todos</option>
+                    <option value="activos" selected="@(ViewBag.FiltroEstadoLogico == "activos")">Activos</option>
+                    <option value="inactivos" selected="@(ViewBag.FiltroEstadoLogico == "inactivos")">Inactivos</option>
+                </select>
+            </div>
+
+            <!-- ESPACIO VACÍO O BOTÓN LIMPIAR -->
+            <div class="col-md-1 col-lg-1">
+                @{
+                    bool hayFiltros = (!string.IsNullOrEmpty(ViewBag.FiltroPlaca)) ||
+                    (!string.IsNullOrEmpty(ViewBag.FiltroMarca)) ||
+                    (ViewBag.FiltroAnio != null) ||
+                    (!string.IsNullOrEmpty(ViewBag.FiltroEstado)) ||
+                    (!string.IsNullOrEmpty(ViewBag.FiltroEstadoLogico));
+                }
+
+                @if (hayFiltros)
+                {
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm w-100 py-1">
+                        <i class="fas fa-times me-1"></i> Limpiar
+                    </a>
+                }
+                else
+                {
+                    <div class="w-100" style="height: 33px;"></div>
+                }
+            </div>
+
+            <!-- BOTÓN FILTRAR -->
+            <div class="col-md-1 col-lg-1">
+                <button type="submit" class="btn btn-sm w-100 py-1"
+                        style="background-color: #283593; border-color: #283593; color: white;">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Placa</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Tipo</th>
+                        <th>Año</th>
+                        <th>Kilometraje</th>
+                        <th>Estado del Vehiculo</th>
+                        <th>Estado General</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        // Primero los activos, luego los inactivos
+                        var vehiculosOrdenados = Model
+                        .OrderByDescending(v => v.estadoLogico)  // Activos primero (true)
+                        .ThenBy(v => v.placa);                   // Luego orden alfabético
+                    }
+
+                    @foreach (var vehiculo in vehiculosOrdenados)
+                    {
+                        <tr>
+                            <td><strong>@vehiculo.placa</strong></td>
+                            <td>@vehiculo.marca</td>
+                            <td>@vehiculo.modelo</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(vehiculo.tipo))
+                                {
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                                            <img src="~/Imagenes/Vehiculos/@(vehiculo.tipo).png"
+                                                 alt="@vehiculo.tipo"
+                                                 style="width: 24px; height: 24px; object-fit: contain;"
+                                                 onerror="this.src='~/Imagenes/Vehiculos/placeholder.png'" />
+                                        </div>
+                                        <span>@vehiculo.tipo</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin tipo</span>
+                                }
+                            </td>
+                            <td>@vehiculo.anio</td>
+                            <td>
+                                @if (vehiculo.kilometraje.HasValue)
+                                {
+                                    @vehiculo.kilometraje.Value.ToString("N0") <text>km</text>
+                                }
+                                else
+                                {
+                                    <text>-</text>
+                                }
+                            </td>
+                            <td>
+                                @if (vehiculo.estado == "Operativo")
+                                {
+                                    <span class="badge bg-success">@vehiculo.estado</span>
+                                }
+                                else if (vehiculo.estado == "En Taller")
+                                {
+                                    <span class="badge bg-warning">@vehiculo.estado</span>
+                                }
+                                else if (vehiculo.estado == "Inoperativo")
+                                {
+                                    <span class="badge bg-danger">@vehiculo.estado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@vehiculo.estado</span>
+                                }
+                            </td>
+                            <td>
+                                @if (vehiculo.estadoLogico)
+                                {
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-check me-1"></i> Activo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-times me-1"></i> Inactivo
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <!-- Botón Detalles -->
+                                    <a asp-action="Detalles"
+                                       asp-route-id="@vehiculo.idVehiculo"
+                                       asp-route-filtroEstadoLogico="@ViewBag.FiltroEstadoLogico"
+                                       class="btn btn-info btn-sm" style="min-width: 90px;">
+                                        <i class="fas fa-eye me-1"></i> Detalles
+                                    </a>
+
+                                    <!-- Botón Editar -->
+                                    <a asp-action="Editar"
+                                       asp-route-id="@vehiculo.idVehiculo"
+                                       asp-route-filtroEstadoLogico="@ViewBag.FiltroEstadoLogico"
+                                       class="btn btn-warning btn-sm" style="min-width: 80px;">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+
+                                    <!-- Botón Deshabilitar/Habilitar -->
+                                    @if (vehiculo.estadoLogico)
+                                    {
+                                        <a asp-action="Eliminar"
+                                           asp-route-id="@vehiculo.idVehiculo"
+                                           asp-route-filtroEstadoLogico="@ViewBag.FiltroEstadoLogico"
+                                           class="btn btn-danger btn-sm" style="min-width: 110px;"
+                                           onclick="return confirm('¿Estás seguro de deshabilitar el vehículo @vehiculo.placa?');">
+                                            <i class="fas fa-user-slash me-1"></i> Deshabilitar
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Habilitar"
+                                           asp-route-id="@vehiculo.idVehiculo"
+                                           asp-route-filtroEstadoLogico="@ViewBag.FiltroEstadoLogico"
+                                           class="btn btn-success btn-sm" style="min-width: 110px;"
+                                           onclick="return confirm('¿Estás seguro de habilitar el vehículo @vehiculo.placa?');">
+                                            <i class="fas fa-user-check me-1"></i> Habilitar
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-info-circle fa-lg text-muted mb-2"></i>
+                                <p class="text-muted mb-0">
+                                    @if (!string.IsNullOrEmpty(ViewBag.FiltroPlaca) ||
+                                                                    !string.IsNullOrEmpty(ViewBag.FiltroMarca) ||
+                                                                    ViewBag.FiltroAnio != null ||
+                                                                    !string.IsNullOrEmpty(ViewBag.FiltroEstado) ||
+                                                                    !string.IsNullOrEmpty(ViewBag.FiltroEstadoLogico))
+                                    {
+                                        <span>No hay vehículos que coincidan con los filtros aplicados</span>
+                                    }
+                                    else
+                                    {
+                                        <span>No hay vehículos registrados</span>
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty(ViewBag.FiltroPlaca) ||
+                                                            !string.IsNullOrEmpty(ViewBag.FiltroMarca) ||
+                                                            ViewBag.FiltroAnio != null ||
+                                                            !string.IsNullOrEmpty(ViewBag.FiltroEstado) ||
+                                                            !string.IsNullOrEmpty(ViewBag.FiltroEstadoLogico))
+                                {
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-primary btn-sm mt-2">
+                                        <i class="fas fa-times me-1"></i> Limpiar filtros
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Crear" class="btn btn-success btn-sm mt-2">
+                                        <i class="fas fa-plus me-1"></i> Agregar Primer Vehículo
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background-color: #1a237e;
+        color: white;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .d-flex.gap-2 {
+        gap: 10px !important;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    /* Estilos para filtros */
+    .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        color: #495057;
+    }
+
+    .form-control-sm, .form-select-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        height: calc(1.5em + 0.5rem + 2px);
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid rgba(0,0,0,.125);
+    }
+
+    /* Ajustes para alinear botones */
+    .col-md-1.col-lg-1 .btn-sm {
+        min-height: 33px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

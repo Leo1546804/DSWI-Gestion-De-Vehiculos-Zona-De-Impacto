@@ -14,19 +14,28 @@ namespace ZonaDeImpacto.Data
         }
 
         //listado de usuarios
-        public async Task<List<Usuario>> ListarUsuariosAsync()
+        public async Task<List<Usuario>> ListarUsuariosAsync(
+            string filtroNombre = null,
+            string filtroRol = null,
+            int? filtroEstado = null)
         {
             List<Usuario> lista = new List<Usuario>();
 
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using(SqlCommand cmd = new SqlCommand("sp_ListarUsuarios", conn))
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarUsuarios", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
+
+                //Agregamos parametros de filtro
+                cmd.Parameters.AddWithValue("@filtroNombre", string.IsNullOrEmpty(filtroNombre) ? (object)DBNull.Value : filtroNombre);
+                cmd.Parameters.AddWithValue("@filtroRol", string.IsNullOrEmpty(filtroRol) ? (object)DBNull.Value : filtroRol);
+                cmd.Parameters.AddWithValue("@filtroEstado", filtroEstado.HasValue ? (object)filtroEstado.Value : DBNull.Value);
+
                 await conn.OpenAsync();
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
                 {
-                    while(await dr.ReadAsync())
+                    while (await dr.ReadAsync())
                     {
                         lista.Add(new Usuario
                         {
@@ -45,8 +54,8 @@ namespace ZonaDeImpacto.Data
         //registrar usuario
         public async Task RegistrarUsuarioAsync(Usuario usuario)
         {
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_InsertarUsuario", conn))
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_InsertarUsuario", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -66,7 +75,7 @@ namespace ZonaDeImpacto.Data
             Usuario usuario = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_ObtenerUsuario", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ObtenerUsuario", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idUsuario", id);
@@ -94,10 +103,10 @@ namespace ZonaDeImpacto.Data
 
         public async Task EditarUsuarioAsync(Usuario usuario)
         {
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EditarUsuario", conn))
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_EditarUsuario", conn))
             {
-                cmd.CommandType= CommandType.StoredProcedure;
+                cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@idUsuario", usuario.idUsuario);
                 cmd.Parameters.AddWithValue("@nombreCompleto", usuario.nombreCompleto);
@@ -113,8 +122,22 @@ namespace ZonaDeImpacto.Data
 
         public async Task EliminarUsuarioAsync(int idUsuario)
         {
-            using(SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_EliminarUsuario", conn))
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_EliminarUsuario", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@idUsuario", idUsuario);
+
+                await conn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
+        //Metodo para habilitar o reactivar al usuario
+        public async Task HabilitarUsuarioAsync(int idUsuario)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_HabilitarUsuario", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@idUsuario", idUsuario);

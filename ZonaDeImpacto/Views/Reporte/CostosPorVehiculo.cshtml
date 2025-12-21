@@ -1,0 +1,234 @@
+﻿@model List<ZonaDeImpacto.Models.Reportes.ReporteCostosVehiculo>
+@{
+    ViewData["Title"] = "Costos por Vehículo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header text-white" style="background-color: #1a237e;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-chart-pie fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0">@ViewData["Title"]</h5>
+                    <small class="opacity-75">
+                        Reporte de gastos por vehículo en un período específico
+                    </small>
+                </div>
+            </div>
+            <div>
+                <a href="@Url.Action("ExportarCostosCSV", new { 
+    fechaInicio = ViewBag.FechaInicio, 
+    fechaFin = ViewBag.FechaFin 
+})" class="btn btn-success px-3">
+    <i class="fas fa-file-excel me-1"></i> Exportar CSV
+</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE FILTROS -->
+    <div class="card-body border-bottom py-3">
+        <form method="post" action="@Url.Action("CostosPorVehiculoPost")" class="row align-items-end">
+            <!-- FILTRO 1: Fecha Inicio -->
+            <div class="col-md-3 col-lg-3">
+                <label class="form-label mb-1">Fecha Inicio:</label>
+                <input type="date" name="fechaInicio" class="form-control form-control-sm"
+                       value="@ViewBag.FechaInicio" required>
+            </div>
+
+            <!-- FILTRO 2: Fecha Fin -->
+            <div class="col-md-3 col-lg-3">
+                <label class="form-label mb-1">Fecha Fin:</label>
+                <input type="date" name="fechaFin" class="form-control form-control-sm"
+                       value="@ViewBag.FechaFin" required>
+            </div>
+
+            <!-- ESPACIO VACÍO -->
+            <div class="col-md-4 col-lg-4"></div>
+
+            <!-- BOTÓN LIMPIAR -->
+            <div class="col-md-1 col-lg-1">
+                <a href="@Url.Action("CostosPorVehiculo")" class="btn btn-outline-secondary btn-sm w-100 py-1">
+                    <i class="fas fa-times me-1"></i> Limpiar
+                </a>
+            </div>
+
+            <!-- BOTÓN FILTRAR -->
+            <div class="col-md-1 col-lg-1">
+                <button type="submit" class="btn btn-sm w-100 py-1"
+                        style="background-color: #283593; border-color: #283593; color: white;">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Vehículo</th>
+                        <th class="text-center">Tipo</th>
+                        <th class="text-center">Mantenimientos</th>
+                        <th class="text-end">Gasto Total</th>
+                        <th class="text-end">Preventivo</th>
+                        <th class="text-end">Correctivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model.OrderByDescending(x => x.totalGastado))
+                        {
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>@item.placa</strong>
+                                        <div class="text-muted small">@item.marca @item.modelo</div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @(item.tipoVehiculo ?? "N/A")
+                                </td>
+                                <td class="text-center">
+                                    @item.totalMantenimientos
+                                </td>
+                                <td class="text-end text-danger fw-bold">
+                                    S/ @item.totalGastado.ToString("N2")
+                                </td>
+                                <td class="text-end">
+                                    S/ @item.gastoPreventivo.ToString("N2")
+                                </td>
+                                <td class="text-end">
+                                    S/ @item.gastoCorrectivo.ToString("N2")
+                                </td>
+                            </tr>
+                        }
+                        
+                        <!-- TOTALES -->
+                        <tr style="background-color: #e3f2fd;">
+                            <td colspan="3" class="text-end fw-bold">TOTALES:</td>
+                            <td class="text-end fw-bold text-danger">
+                                S/ @Model.Sum(x => x.totalGastado).ToString("N2")
+                            </td>
+                            <td class="text-end fw-bold">
+                                S/ @Model.Sum(x => x.gastoPreventivo).ToString("N2")
+                            </td>
+                            <td class="text-end fw-bold">
+                                S/ @Model.Sum(x => x.gastoCorrectivo).ToString("N2")
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <i class="fas fa-chart-pie fa-2x text-muted mb-2"></i>
+                                <p class="text-muted mb-0">
+                                    @if (!string.IsNullOrEmpty(ViewBag.FechaInicio) || !string.IsNullOrEmpty(ViewBag.FechaFin))
+                                    {
+                                        <span>No hay datos para mostrar en el período seleccionado</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Seleccione un período para generar el reporte</span>
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty(ViewBag.FechaInicio) || !string.IsNullOrEmpty(ViewBag.FechaFin))
+                                {
+                                    <a href="@Url.Action("CostosPorVehiculo")" class="btn btn-outline-primary btn-sm mt-2">
+                                        <i class="fas fa-times me-1"></i> Limpiar filtros
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- RESUMEN -->
+        @if (Model.Any())
+        {
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Vehículos</h6>
+                            <h3>@Model.Count</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Mantenimientos</h6>
+                            <h3>@Model.Sum(x => x.totalMantenimientos)</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Gasto Total</h6>
+                            <h3 class="text-danger">S/ @Model.Sum(x => x.totalGastado).ToString("N2")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 8px;
+        background-color: #1a237e;
+        color: white;
+    }
+
+    .table td {
+        font-size: 14px;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        color: #495057;
+    }
+
+    .form-control-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        height: calc(1.5em + 0.5rem + 2px);
+    }
+</style>

@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using ZonaDeImpacto.Filters;
 using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Controllers
 {
+    [ValidarSesion]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

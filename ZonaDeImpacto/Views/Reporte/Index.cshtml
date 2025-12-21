@@ -1,0 +1,134 @@
+﻿@{
+    ViewData["Title"] = "Reportes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header text-white" style="background-color: #1a237e;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-chart-bar fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0">@ViewData["Title"]</h5>
+                    <small class="opacity-75">Seleccione el reporte que desea generar</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <!-- Reporte 1: Costos por Vehículo -->
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-header text-white" style="background-color: #1a237e;">
+                            <h6 class="mb-0">
+                                <i class="fas fa-car me-2"></i>Costos por Vehículo
+                            </h6>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-pie fa-3x text-primary"></i>
+                            </div>
+                            <p class="card-text flex-grow-1">
+                                Muestra los gastos totales por vehículo en un período específico.
+                            </p>
+                            <a href="@Url.Action("CostosPorVehiculo")" class="btn btn-primary mt-auto">
+                                <i class="fas fa-eye me-1"></i> Ver Reporte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 2: Historial de Vehículo -->
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-header text-white" style="background-color: #1a237e;">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Historial de Vehículo
+                            </h6>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <i class="fas fa-file-alt fa-3x text-success"></i>
+                            </div>
+                            <p class="card-text flex-grow-1">
+                                Reporte detallado de todos los mantenimientos y gastos de un vehículo específico.
+                            </p>
+                            <a href="@Url.Action("HistorialVehiculo")" class="btn btn-success mt-auto">
+                                <i class="fas fa-search me-1"></i> Ver Reporte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 3: Dashboard -->
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-header text-white" style="background-color: #1a237e;">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </h6>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-3x text-warning"></i>
+                            </div>
+                            <p class="card-text flex-grow-1">
+                                Resumen ejecutivo con estadísticas clave del mes actual.
+                            </p>
+                            <a href="@Url.Action("Dashboard")" class="btn btn-warning text-white mt-auto">
+                                <i class="fas fa-chart-bar me-1"></i> Ver Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 4: Actividad por Usuario -->
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-header text-white" style="background-color: #1a237e;">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user-check me-2"></i>Actividad por Usuario
+                            </h6>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <i class="fas fa-users fa-3x text-info"></i>
+                            </div>
+                            <p class="card-text flex-grow-1">
+                                Reporte de mantenimientos y gastos generados por cada usuario.
+                            </p>
+                            <a href="@Url.Action("ActividadUsuario")" class="btn btn-info text-white mt-auto">
+                                <i class="fas fa-chart-line me-1"></i> Ver Reporte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .fa-3x {
+        font-size: 3em;
+    }
+</style>

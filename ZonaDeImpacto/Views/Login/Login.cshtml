@@ -7,38 +7,128 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>@ViewBag.Title - Invictos</title>
+    <title>@ViewBag.Title - Zona de Impacto</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="icon" type="image/png" href="~/img/logo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="~/img/logo.jpg" />
+
+    <style>
+        body {
+            background: url('/Imagenes/Fondos/Wallpaper.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .logo-img {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .btn-login {
+            background-color: #1a237e;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
+
+            .btn-login:hover {
+                background-color: #0d1b6b;
+                color: white;
+            }
+
+        .form-control {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+            .form-control:focus {
+                border-color: #1a237e;
+                box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
+            }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+            margin-top: 15px;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
 </head>
-<body class="bg-light">
-
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card p-4 shadow" style="width: 100%; max-width: 380px;">
-            <div class="text-center mb-3">
-                <img src="~/img/logo.jpg" alt="Logo Invictos" style="width: 120px;" />
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="text-center mb-4">
+                    <img src="~/img/logo.jpg" alt="Logo" class="logo-img">
+                <h3>Inicio de sesión</h3>
+                <p class="text-muted">Gestión de Mantenimiento de Vehículos</p>
             </div>
-
-            <h2 class="text-center mb-3">Iniciar Sesión</h2>
 
             <form method="post">
                 <div class="mb-3">
-                    <label>Usuario</label>
-                    <input name="usuario" class="form-control" required />
+                    <label class="form-label">Usuario</label>
+                    <input name="usuario" class="form-control" placeholder="Ingrese su usuario" required>
                 </div>
 
                 <div class="mb-3">
-                    <label>Contraseña</label>
-                    <input name="password" type="password" class="form-control" required />
+                    <label class="form-label">Contraseña</label>
+                    <input name="password" type="password" class="form-control" placeholder="Ingrese su contraseña" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                <button type="submit" class="btn btn-login mt-3">
+                    <i class="fas fa-sign-in-alt"></i> Ingresar
+                </button>
 
-                <span class="text-danger">@ViewBag.Error</span>
+                @if (!string.IsNullOrEmpty(ViewBag.Error))
+                {
+                    <div class="alert-error mt-3">
+                        <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                    </div>
+                }
             </form>
+
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    Ingresa con tus credenciales asignadas
+                </small>
+            </div>
         </div>
     </div>
-
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

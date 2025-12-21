@@ -6,8 +6,8 @@ using ZonaDeImpacto.Models;
 
 namespace ZonaDeImpacto.Controllers
 {
-    [ValidarAdmin]
     [ValidarSesion]
+    [ValidarAdmin]
     public class UsuarioController : Controller
     {
         private readonly UsuarioRepository _repo;
@@ -18,9 +18,28 @@ namespace ZonaDeImpacto.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string filtroNombre = null,
+            string filtroRol = null,
+            string filtroEstado = null)
         {
-            List<Usuario> lista = await _repo.ListarUsuariosAsync();
+            // Convertimos filtroEstado a int?
+            int? estadoFiltro = null;
+            if (filtroEstado == "activos") estadoFiltro = 1;
+            else if (filtroEstado == "inactivos") estadoFiltro = 0;
+
+            //Pasamos los filtros a la vista
+            ViewBag.FiltroNombre = filtroNombre;
+            ViewBag.FiltroRol = filtroRol;
+            ViewBag.FiltroEstado = filtroEstado;
+
+            //Obtenemos lista de roles unicos para el dropdown
+            var todosUsuarios = await _repo.ListarUsuariosAsync();
+            ViewBag.Roles = todosUsuarios.Select(u => u.rol).Distinct().ToList();
+
+            // Obtenemos usuarios filtrados
+                List<Usuario> lista = await _repo.ListarUsuariosAsync(
+                    filtroNombre, filtroRol, estadoFiltro);
             return View(lista);
         }
 
@@ -46,7 +65,8 @@ namespace ZonaDeImpacto.Controllers
         public async Task<IActionResult> Editar(int id)
         {
             Usuario usuario = await _repo.ObtenerUsuarioAsync(id);
-            if(usuario == null) {
+            if (usuario == null)
+            {
                 return NotFound();
             }
 
@@ -75,11 +95,40 @@ namespace ZonaDeImpacto.Controllers
             return RedirectToAction("Index");
         }
 
+        // Desabilitamos al usuario
         [HttpGet]
-        public async Task<IActionResult> Eliminar(int id)
+        public async Task<IActionResult> Eliminar(int id, string filtroEstado = null)
         {
             await _repo.EliminarUsuarioAsync(id);
-            return RedirectToAction("Index");
+            //Redirigimos manteniendo filtros
+            return RedirectToAction("Index", new
+            {
+                filtroEstado = filtroEstado
+            });
+        }
+
+        // Habilitamos al usuario
+        [HttpGet]
+        public async Task<IActionResult> Habilitar(int id, string filtroEstado = null)
+        {
+            await _repo.HabilitarUsuarioAsync(id);
+            //Redirigir manteniendo los filtros
+            return RedirectToAction("Index", new
+            {
+                filtroEstado = filtroEstado
+            });
+        }
+
+        // Detalles
+        [HttpGet]
+        public async Task<IActionResult> Detalles(int id)
+        {
+            Usuario usuario = await _repo.ObtenerUsuarioAsync(id);
+            if (usuario == null)
+            {
+                return NotFound();
+            }
+            return View(usuario);
         }
 
     }

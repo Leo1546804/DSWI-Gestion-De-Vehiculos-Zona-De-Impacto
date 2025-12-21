@@ -1,3 +1,4 @@
+using Rotativa.AspNetCore;
 using ZonaDeImpacto.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,18 +9,22 @@ builder.Services.AddControllersWithViews();
 // Habilitar sesiones
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(30);
+    options.IdleTimeout = TimeSpan.FromSeconds(600);
 });
 
 // Acceso al HttpContext
 builder.Services.AddHttpContextAccessor();
 
 
-
-
 // Registrar repositorio en el ADO.NET
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<LoginRepository>();
+builder.Services.AddScoped<VehiculoRepository>();
+
+builder.Services.AddScoped<TipoGastoRepository>();
+builder.Services.AddScoped<MantenimientoRepository>();
+builder.Services.AddScoped<GastoRepository>();
+builder.Services.AddScoped<ReporteRepository>();
 
 var app = builder.Build();
 
@@ -46,5 +51,6 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Login}/{id?}");
+
 
 app.Run();

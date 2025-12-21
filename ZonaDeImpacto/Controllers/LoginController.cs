@@ -24,7 +24,7 @@ namespace ZonaDeImpacto.Controllers
         {
             Usuario user = await _repo.LoginAsync(usuario, password);
 
-            if(user == null)
+            if (user == null)
             {
                 ViewBag.Error = "Usuario o contraseña incorrectos";
                 return View();
@@ -34,10 +34,10 @@ namespace ZonaDeImpacto.Controllers
                 ViewBag.Error = "Usuario desactivado";
                 return View();
             }
-
+            HttpContext.Session.SetInt32("idUsuario", user.idUsuario);
             HttpContext.Session.SetString("usuario", user.usuario);
             HttpContext.Session.SetString("nombre", user.nombreCompleto);
-            HttpContext.Session.SetString("rol",user.rol);
+            HttpContext.Session.SetString("rol", user.rol);
 
             return RedirectToAction("Index", "Home");
         }
