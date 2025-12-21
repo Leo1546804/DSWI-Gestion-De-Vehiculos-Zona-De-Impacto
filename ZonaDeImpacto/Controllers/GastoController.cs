@@ -26,27 +26,6 @@ namespace ZonaDeImpacto.Controllers
             string filtroFechaDesde = null,
             string filtroFechaHasta = null)
         {
-            // Siempre restablecer a página 1 cuando se aplican filtros (excepto si ya se está en una página específica)
-            if ((!string.IsNullOrEmpty(filtroMantenimientoCodigo) ||
-                 filtroTipoGasto.HasValue ||
-                 filtroUsuario.HasValue ||
-                 !string.IsNullOrEmpty(filtroFechaDesde) ||
-                 !string.IsNullOrEmpty(filtroFechaHasta)) &&
-                pagina == 1)
-            {
-                // Si hay filtros y es página 1, mantener página 1
-            }
-            else if ((!string.IsNullOrEmpty(filtroMantenimientoCodigo) ||
-                      filtroTipoGasto.HasValue ||
-                      filtroUsuario.HasValue ||
-                      !string.IsNullOrEmpty(filtroFechaDesde) ||
-                      !string.IsNullOrEmpty(filtroFechaHasta)) &&
-                     pagina > 1)
-            {
-                // Si hay filtros y página > 1, verificar si hay resultados
-                // La verificación se hace después de obtener los datos
-            }
-
             int pageSize = 6; // Cantidad de gastos por página
 
             // Obtener datos de sesión
@@ -81,16 +60,13 @@ namespace ZonaDeImpacto.Controllers
                 fechaHasta = parsedHasta;
             }
 
-            // Convertir filtroUsuario a string para el stored procedure
-            string filtroUsuarioStr = filtroUsuario?.ToString();
-
             // Obtener datos con paginación
             var (gastos, totalRegistros) = await _repo.ListarGastosPaginadoAsync(
                 pagina: pagina,
                 tamanoPagina: pageSize,
                 filtroMantenimientoCodigo: filtroMantenimientoCodigo,
                 filtroTipoGasto: filtroTipoGasto,
-                filtroUsuario: filtroUsuarioStr,
+                filtroUsuario: filtroUsuario,  // ENVIAR DIRECTAMENTE COMO int?
                 filtroFechaDesde: fechaDesde,
                 filtroFechaHasta: fechaHasta,
                 idUsuarioFiltro: idUsuarioFiltro);
@@ -128,7 +104,6 @@ namespace ZonaDeImpacto.Controllers
             return View(gastos);
         }
 
-        // Resto del código se mantiene igual...
         // Crear - GET
         public async Task<IActionResult> Crear()
         {
