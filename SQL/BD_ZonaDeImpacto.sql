@@ -345,30 +345,273 @@ BEGIN
 END
 GO
 
---OBTENER POR ID
-CREATE OR ALTER PROCEDURE dbo.usp_ObtenerMantenimiento
-    @idMantenimiento INT
+--LISTAMOS CON PAGINACIÓN (NUEVO PROCEDIMIENTO)
+CREATE OR ALTER PROCEDURE dbo.usp_ObtenerMantenimientosPaginado
+    @Pagina INT = 1,
+    @TamanoPagina INT = 6,
+    @TotalRegistros INT OUTPUT
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
+    -- Contar total de registros
+    SELECT @TotalRegistros = COUNT(*)
+    FROM Mantenimientos m 
+    INNER JOIN Vehiculos v ON m.idVehiculo = v.idVehiculo
+    INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario;
+    
+    -- Obtener registros paginados
     SELECT 
         m.idMantenimiento,
         m.codigoMantenimiento,
-        m.idVehiculo,
-        m.tipo as tipoMantenimiento,
-        m.descripcion,
-        m.fecha,
-        m.idUsuario,
         v.placa,
         v.marca,
         v.modelo,
-        v.tipo as tipoVehiculo,
-        u.nombreCompleto as usuarioNombre
-    FROM Mantenimientos m
+        m.tipo,
+        m.descripcion,
+        m.fecha,
+        u.nombreCompleto as usuarioNombre,
+        u.idUsuario as idUsuario,
+        m.estadoLogico
+    FROM Mantenimientos m 
     INNER JOIN Vehiculos v ON m.idVehiculo = v.idVehiculo
     INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
-    WHERE m.idMantenimiento = @idMantenimiento;
+    ORDER BY m.estadoLogico DESC, m.fecha DESC, m.idMantenimiento DESC
+    OFFSET (@Pagina - 1) * @TamanoPagina ROWS
+    FETCH NEXT @TamanoPagina ROWS ONLY;
 END
 GO
+
+-- LISTAR MANTENIMIENTOS CON PAGINACIÓN Y FILTROS (Nuevo Procedimiento)
+CREATE OR ALTER PROCEDURE dbo.usp_ListarMantenimientosPaginado
+    @Pagina INT = 1,
+    @TamanoPagina INT = 6,
+    @filtroCodigo INT = NULL,
+    @filtroVehiculo INT = NULL,
+    @filtroTipo NVARCHAR(20) = NULL,
+    @filtroFechaDesde DATE = NULL,
+    @filtroFechaHasta DATE = NULL,
+    @filtroEstado BIT = NULL,
+    @idUsuario INT = NULL,
+    @TotalRegistros INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Contar total de registros con filtros
+    SELECT @TotalRegistros = COUNT(*)
+    FROM Mantenimientos m 
+    INNER JOIN Vehiculos v ON m.idVehiculo = v.idVehiculo
+    INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
+    WHERE (@filtroCodigo IS NULL OR m.idMantenimiento = @filtroCodigo)
+      AND (@filtroVehiculo IS NULL OR m.idVehiculo = @filtroVehiculo)
+      AND (@filtroTipo IS NULL OR m.tipo = @filtroTipo)
+      AND (@filtroFechaDesde IS NULL OR m.fecha >= @filtroFechaDesde)
+      AND (@filtroFechaHasta IS NULL OR m.fecha <= @filtroFechaHasta)
+      AND (@filtroEstado IS NULL OR m.estadoLogico = @filtroEstado)
+      AND (@idUsuario IS NULL OR m.idUsuario = @idUsuario);
+    
+    -- Obtener registros paginados
+    SELECT 
+        m.idMantenimiento,
+        m.codigoMantenimiento,
+        v.placa,
+        v.marca,
+        v.modelo,
+        m.tipo,
+        m.descripcion,
+        m.fecha,
+        u.nombreCompleto as usuarioNombre,
+        u.idUsuario as idUsuario,
+        m.estadoLogico
+    FROM Mantenimientos m 
+    INNER JOIN Vehiculos v ON m.idVehiculo = v.idVehiculo
+    INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
+    WHERE (@filtroCodigo IS NULL OR m.idMantenimiento = @filtroCodigo)
+      AND (@filtroVehiculo IS NULL OR m.idVehiculo = @filtroVehiculo)
+      AND (@filtroTipo IS NULL OR m.tipo = @filtroTipo)
+      AND (@filtroFechaDesde IS NULL OR m.fecha >= @filtroFechaDesde)
+      AND (@filtroFechaHasta IS NULL OR m.fecha <= @filtroFechaHasta)
+      AND (@filtroEstado IS NULL OR m.estadoLogico = @filtroEstado)
+      AND (@idUsuario IS NULL OR m.idUsuario = @idUsuario)
+    ORDER BY m.estadoLogico DESC, m.fecha DESC, m.idMantenimiento DESC
+    OFFSET (@Pagina - 1) * @TamanoPagina ROWS
+    FETCH NEXT @TamanoPagina ROWS ONLY;
+END
+GO
+-- AGREGA LISTAR COSTOS PAGINADOS (Nuevo Procedimiento
+CREATE OR ALTER PROCEDURE dbo.usp_ListarGastosPaginado
+    @Pagina INT = 1,
+    @TamanoPagina INT = 6,
+    @filtroMantenimientoCodigo NVARCHAR(20) = NULL,
+    @filtroTipoGasto INT = NULL,
+    @filtroUsuario INT = NULL, 
+    @filtroFechaDesde DATE = NULL,
+    @filtroFechaHasta DATE = NULL,
+    @idUsuarioFiltro INT = NULL,
+    @TotalRegistros INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Contar total de registros con filtros
+    SELECT @TotalRegistros = COUNT(*)
+    FROM Gastos g
+    INNER JOIN Mantenimientos m ON g.idMantenimiento = m.idMantenimiento
+    INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
+    INNER JOIN TipoGasto tg ON g.idTipoGasto = tg.idTipoGasto
+    WHERE (@filtroMantenimientoCodigo IS NULL OR m.codigoMantenimiento LIKE '%' + @filtroMantenimientoCodigo + '%')
+      AND (@filtroTipoGasto IS NULL OR g.idTipoGasto = @filtroTipoGasto)
+      -- CAMBIADO: Ahora comparamos por ID en lugar de nombre
+      AND (@filtroUsuario IS NULL OR u.idUsuario = @filtroUsuario)
+      AND (@filtroFechaDesde IS NULL OR g.fecha >= @filtroFechaDesde)
+      AND (@filtroFechaHasta IS NULL OR g.fecha <= @filtroFechaHasta)
+      AND (@idUsuarioFiltro IS NULL OR u.idUsuario = @idUsuarioFiltro);
+    
+    -- Obtener registros paginados
+    SELECT 
+        g.idGasto,
+        m.codigoMantenimiento,
+        tg.nombre AS tipoGastoNombre,
+        u.nombreCompleto AS usuarioNombre,
+        u.idUsuario,
+        g.monto,
+        g.fecha,
+        g.descripcion,
+        m.idMantenimiento,
+        tg.idTipoGasto,
+        m.estadoLogico AS mantenimientoActivo
+    FROM Gastos g
+    INNER JOIN Mantenimientos m ON g.idMantenimiento = m.idMantenimiento
+    INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
+    INNER JOIN TipoGasto tg ON g.idTipoGasto = tg.idTipoGasto
+    WHERE (@filtroMantenimientoCodigo IS NULL OR m.codigoMantenimiento LIKE '%' + @filtroMantenimientoCodigo + '%')
+      AND (@filtroTipoGasto IS NULL OR g.idTipoGasto = @filtroTipoGasto)
+      -- CAMBIADO: Ahora comparamos por ID en lugar de nombre
+      AND (@filtroUsuario IS NULL OR u.idUsuario = @filtroUsuario)
+      AND (@filtroFechaDesde IS NULL OR g.fecha >= @filtroFechaDesde)
+      AND (@filtroFechaHasta IS NULL OR g.fecha <= @filtroFechaHasta)
+      AND (@idUsuarioFiltro IS NULL OR u.idUsuario = @idUsuarioFiltro)
+    ORDER BY g.fecha DESC, g.idGasto DESC
+    OFFSET (@Pagina - 1) * @TamanoPagina ROWS
+    FETCH NEXT @TamanoPagina ROWS ONLY;
+END
+GO
+-- Procedimiento para listar tipos de gasto con paginación (Nuevo Procedure)
+CREATE PROCEDURE usp_ListarTiposGastoPaginado
+    @filtroNombre VARCHAR(100) = NULL,
+    @soloActivos BIT = NULL,
+    @pagina INT = 1,
+    @tamanoPagina INT = 6
+AS
+BEGIN
+    DECLARE @offset INT = (@pagina - 1) * @tamanoPagina
+
+    -- Primero obtenemos los datos paginados
+    SELECT *
+    FROM (
+        SELECT 
+            idTipoGasto,
+            nombre,
+            descripcion,
+            estadoLogico,
+            ROW_NUMBER() OVER (ORDER BY 
+                CASE WHEN estadoLogico = 1 THEN 0 ELSE 1 END,
+                nombre) AS RowNum
+        FROM TipoGasto
+        WHERE (@filtroNombre IS NULL OR nombre LIKE '%' + @filtroNombre + '%')
+          AND (@soloActivos IS NULL OR estadoLogico = @soloActivos)
+    ) AS Resultado
+    WHERE RowNum > @offset AND RowNum <= @offset + @tamanoPagina
+    ORDER BY RowNum
+
+    -- Luego el total de registros
+    SELECT COUNT(*)
+    FROM TipoGasto
+    WHERE (@filtroNombre IS NULL OR nombre LIKE '%' + @filtroNombre + '%')
+      AND (@soloActivos IS NULL OR estadoLogico = @soloActivos)
+END
+GO
+-- Procedimiento para listar gastos con paginación (nuevo procedure)
+CREATE OR ALTER PROCEDURE dbo.usp_ListarVehiculosPaginado
+    @Pagina INT = 1,
+    @TamanoPagina INT = 6,
+    @filtroPlaca NVARCHAR(15) = NULL,
+    @filtroMarca NVARCHAR(50) = NULL,
+    @filtroAnio INT = NULL,
+    @filtroEstado NVARCHAR(20) = NULL,
+    @soloActivos BIT = NULL,
+    @TotalRegistros INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Crear tabla temporal con los datos filtrados
+    CREATE TABLE #TempVehiculos (
+        RowNumber INT IDENTITY(1,1),
+        idVehiculo INT,
+        placa NVARCHAR(15),
+        marca NVARCHAR(50),
+        modelo NVARCHAR(50),
+        tipo NVARCHAR(50),
+        anio INT,
+        kilometraje INT,
+        estado NVARCHAR(20),
+        estadoLogico BIT
+    );
+
+    -- Insertar datos filtrados en tabla temporal
+    INSERT INTO #TempVehiculos (
+        idVehiculo, placa, marca, modelo, tipo, anio, 
+        kilometraje, estado, estadoLogico
+    )
+    SELECT 
+        v.idVehiculo,
+        v.placa,
+        v.marca,
+        v.modelo,
+        v.tipo,
+        v.anio,
+        v.kilometraje,
+        v.estado,
+        v.estadoLogico
+    FROM Vehiculos v
+    WHERE 
+        (@filtroPlaca IS NULL OR v.placa LIKE '%' + @filtroPlaca + '%')
+        AND (@filtroMarca IS NULL OR v.marca LIKE '%' + @filtroMarca + '%')
+        AND (@filtroAnio IS NULL OR v.anio = @filtroAnio)
+        AND (@filtroEstado IS NULL OR v.estado = @filtroEstado)
+        AND (@soloActivos IS NULL OR v.estadoLogico = @soloActivos)
+    ORDER BY v.estadoLogico DESC, v.placa;
+
+    -- Obtener total de registros
+    SELECT @TotalRegistros = COUNT(*) FROM #TempVehiculos;
+
+    -- Obtener datos paginados
+    SELECT 
+        idVehiculo,
+        placa,
+        marca,
+        modelo,
+        tipo,
+        anio,
+        kilometraje,
+        estado,
+        estadoLogico
+    FROM #TempVehiculos
+    WHERE RowNumber BETWEEN ((@Pagina - 1) * @TamanoPagina + 1) 
+        AND (@Pagina * @TamanoPagina)
+    ORDER BY RowNumber;
+
+    -- Limpiar tabla temporal
+    DROP TABLE #TempVehiculos;
+END
+GO
+
+--Estos procedures son importante implementar porque es solo utilizado en la vista
+--y que al momento de exportar no haya complictos 
+--ya que si no usamos los procedures sin paginar no se exportara toda la informacion 
+
 
 --EDITAMOS
 CREATE OR ALTER PROCEDURE dbo.usp_EditarMantenimiento
@@ -962,3 +1205,4 @@ SELECT * FROM TipoGasto
 GO
 SELECT * FROM Mantenimientos
 GO	
+
