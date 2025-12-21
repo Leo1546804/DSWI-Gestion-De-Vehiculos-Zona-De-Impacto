@@ -13,44 +13,27 @@ namespace ZonaDeImpacto.Data
             _connectionString = configuration.GetConnectionString("conexion");
         }
 
-        // Listar con filtros
-        public async Task<List<Mantenimiento>> ListarMantenimientosAsync(
-            int? filtroCodigo = null,
-            int? filtroVehiculo = null,
-            string filtroTipo = null,
-            DateTime? filtroFechaDesde = null,
-            DateTime? filtroFechaHasta = null,
-            string filtroEstado = null,
-            int? idUsuarioFiltro = null)
+        // MÉTODO PRINCIPAL PARA PAGINACIÓN
+        public async Task<(List<Mantenimiento> Mantenimientos, int TotalRegistros)> ObtenerMantenimientosPaginadoAsync(int pagina = 1, int tamanoPagina = 6)
         {
             List<Mantenimiento> lista = new List<Mantenimiento>();
-
-            // Convertir filtroEstado a bool?
-            bool? estadoFiltro = null;
-            if (filtroEstado == "activos")
-                estadoFiltro = true;
-            else if (filtroEstado == "anulados")
-                estadoFiltro = false;
+            int totalRegistros = 0;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarMantenimientos", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ObtenerMantenimientosPaginado", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@filtroCodigo",
-                    filtroCodigo.HasValue ? (object)filtroCodigo.Value : DBNull.Value);
-                cmd.Parameters.AddWithValue("@filtroVehiculo",
-                    filtroVehiculo.HasValue ? (object)filtroVehiculo.Value : DBNull.Value);
-                cmd.Parameters.AddWithValue("@filtroTipo",
-                    string.IsNullOrEmpty(filtroTipo) ? (object)DBNull.Value : filtroTipo);
-                cmd.Parameters.AddWithValue("@filtroFechaDesde",
-                    filtroFechaDesde.HasValue ? (object)filtroFechaDesde.Value : DBNull.Value);
-                cmd.Parameters.AddWithValue("@filtroFechaHasta",
-                    filtroFechaHasta.HasValue ? (object)filtroFechaHasta.Value : DBNull.Value);
-                cmd.Parameters.AddWithValue("@filtroEstado",
-                    estadoFiltro.HasValue ? (object)estadoFiltro.Value : DBNull.Value);
-                cmd.Parameters.AddWithValue("@idUsuario",
-                    idUsuarioFiltro.HasValue ? (object)idUsuarioFiltro.Value : DBNull.Value);
+                // Solo parámetros de paginación 
+                cmd.Parameters.AddWithValue("@Pagina", pagina);
+                cmd.Parameters.AddWithValue("@TamanoPagina", tamanoPagina);
+
+                // Parámetro de salida para total de registros
+                SqlParameter totalRegistrosParam = new SqlParameter("@TotalRegistros", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(totalRegistrosParam);
 
                 await conn.OpenAsync();
 
@@ -74,8 +57,115 @@ namespace ZonaDeImpacto.Data
                         });
                     }
                 }
+
+                // Obtener el valor del parámetro de salida
+                totalRegistros = totalRegistrosParam.Value != DBNull.Value ? (int)totalRegistrosParam.Value : 0;
             }
-            return lista;
+
+            return (lista, totalRegistros);
+        }
+
+        // MÉTODO CON FILTROS
+        public async Task<(List<Mantenimiento> Mantenimientos, int TotalRegistros)> ListarMantenimientosPaginadoAsync(
+            int pagina = 1,
+            int tamanoPagina = 6,
+            int? filtroCodigo = null,
+            int? filtroVehiculo = null,
+            string filtroTipo = null,
+            DateTime? filtroFechaDesde = null,
+            DateTime? filtroFechaHasta = null,
+            string filtroEstado = null,
+            int? idUsuarioFiltro = null)
+        {
+            List<Mantenimiento> lista = new List<Mantenimiento>();
+            int totalRegistros = 0;
+
+            // Convertir filtroEstado a bool?
+            bool? estadoFiltro = null;
+            if (filtroEstado == "activos")
+                estadoFiltro = true;
+            else if (filtroEstado == "anulados")
+                estadoFiltro = false;
+            // else = null (muestra todos)
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarMantenimientosPaginado", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@Pagina", pagina);
+                cmd.Parameters.AddWithValue("@TamanoPagina", tamanoPagina);
+                cmd.Parameters.AddWithValue("@filtroCodigo",
+                    filtroCodigo.HasValue ? (object)filtroCodigo.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@filtroVehiculo",
+                    filtroVehiculo.HasValue ? (object)filtroVehiculo.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@filtroTipo",
+                    string.IsNullOrEmpty(filtroTipo) ? (object)DBNull.Value : filtroTipo);
+                cmd.Parameters.AddWithValue("@filtroFechaDesde",
+                    filtroFechaDesde.HasValue ? (object)filtroFechaDesde.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@filtroFechaHasta",
+                    filtroFechaHasta.HasValue ? (object)filtroFechaHasta.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@filtroEstado",
+                    estadoFiltro.HasValue ? (object)estadoFiltro.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@idUsuario",
+                    idUsuarioFiltro.HasValue ? (object)idUsuarioFiltro.Value : DBNull.Value);
+
+                SqlParameter totalRegistrosParam = new SqlParameter("@TotalRegistros", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(totalRegistrosParam);
+
+                await conn.OpenAsync();
+
+                using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
+                {
+                    while (await dr.ReadAsync())
+                    {
+                        lista.Add(new Mantenimiento
+                        {
+                            idMantenimiento = dr.GetInt32(0),
+                            codigoMantenimiento = dr.GetString(1),
+                            placa = dr.GetString(2),
+                            marca = dr.GetString(3),
+                            modelo = dr.GetString(4),
+                            tipo = dr.GetString(5),
+                            descripcion = dr.IsDBNull(6) ? null : dr.GetString(6),
+                            fecha = dr.GetDateTime(7),
+                            usuarioNombre = dr.GetString(8),
+                            idUsuario = dr.GetInt32(9),
+                            estadoLogico = dr.GetBoolean(10)
+                        });
+                    }
+                }
+
+                totalRegistros = totalRegistrosParam.Value != DBNull.Value ? (int)totalRegistrosParam.Value : 0;
+            }
+
+            return (lista, totalRegistros);
+        }
+
+        // Método sin paginación para compatibilidad
+        public async Task<List<Mantenimiento>> ListarMantenimientosAsync(
+            int? filtroCodigo = null,
+            int? filtroVehiculo = null,
+            string filtroTipo = null,
+            DateTime? filtroFechaDesde = null,
+            DateTime? filtroFechaHasta = null,
+            string filtroEstado = null,
+            int? idUsuarioFiltro = null)
+        {
+            var (mantenimientos, _) = await ListarMantenimientosPaginadoAsync(
+                pagina: 1,
+                tamanoPagina: int.MaxValue,
+                filtroCodigo: filtroCodigo,
+                filtroVehiculo: filtroVehiculo,
+                filtroTipo: filtroTipo,
+                filtroFechaDesde: filtroFechaDesde,
+                filtroFechaHasta: filtroFechaHasta,
+                filtroEstado: filtroEstado,
+                idUsuarioFiltro: idUsuarioFiltro);
+
+            return mantenimientos;
         }
 
         // Obtener vehículos para DROPDOWN (usando proc específico)
@@ -130,6 +220,7 @@ namespace ZonaDeImpacto.Data
             }
             catch (Exception ex)
             {
+                // Loguear el error
                 Console.WriteLine($"Error en RegistrarMantenimientoAsync: {ex.Message}");
                 throw; // Re-lanzar la excepción
             }
@@ -227,7 +318,7 @@ namespace ZonaDeImpacto.Data
             return new List<string> { "Preventivo", "Correctivo" };
         }
 
-        // Obtener usuarios para dropdown (solo activos)
+        // Obtener usuarios para dropdown
         public async Task<List<Usuario>> ObtenerUsuariosAsync()
         {
             List<Usuario> lista = new List<Usuario>();
@@ -245,7 +336,7 @@ namespace ZonaDeImpacto.Data
                         lista.Add(new Usuario
                         {
                             idUsuario = dr.GetInt32(0),
-                            nombreCompleto = dr.GetString(1),  // Usar nombreCompleto
+                            nombreCompleto = dr.GetString(1),
                             rol = dr.GetString(2)
                         });
                     }

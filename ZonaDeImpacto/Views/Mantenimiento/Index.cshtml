@@ -53,6 +53,9 @@
     <!-- SECCIÓN DE FILTROS - DISTRIBUCIÓN: 2+2+2+1+1+1+1+1 = 11 columnas -->
     <div class="card-body border-bottom py-3">
         <form method="get" class="row align-items-end">
+            <!-- Campo oculto para mantener la página actual -->
+            <input type="hidden" name="pagina" value="@ViewBag.PaginaActual" />
+
             <!-- FILTRO 1: Código (2) -->
             <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Código:</label>
@@ -121,7 +124,8 @@
                                 !string.IsNullOrEmpty(ViewBag.FiltroTipo) ||
                                 !string.IsNullOrEmpty(ViewBag.FiltroFechaDesde) ||
                                 !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta) ||
-                                !string.IsNullOrEmpty(ViewBag.FiltroEstado))
+                                !string.IsNullOrEmpty(ViewBag.FiltroEstado) ||
+                                (ViewBag.PaginaActual > 1))
                 {
                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm w-100 py-1">
                         <i class="fas fa-times me-1"></i> Limpiar
@@ -159,103 +163,100 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @{
-                        var mantenimientosOrdenados = Model
-                        .OrderByDescending(m => m.estadoLogico)
-                        .ThenByDescending(m => m.fecha);
-                    }
-
-                    @foreach (var mantenimiento in mantenimientosOrdenados)
+                    @if (Model != null && Model.Any())
                     {
-                        <tr>
-                            <td><strong>@mantenimiento.codigoMantenimiento</strong></td>
-                            <td>
-                                <div class="fw-medium">@mantenimiento.placa</div>
-                                <small class="text-muted">@mantenimiento.marca @mantenimiento.modelo</small>
-                            </td>
-                            <td>@mantenimiento.tipo</td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(mantenimiento.descripcion))
-                                {
-                                    <span class="text-muted" title="@mantenimiento.descripcion">
-                                        @(mantenimiento.descripcion.Length > 30 ? mantenimiento.descripcion.Substring(0, 30) + "..." : mantenimiento.descripcion)
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted fst-italic">Sin descripción</span>
-                                }
-                            </td>
-                            <td>@mantenimiento.fecha.ToString("dd/MM/yyyy")</td>
-                            <td>@mantenimiento.usuarioNombre</td>
-                            <td>
-                                @if (mantenimiento.estadoLogico)
-                                {
-                                    <span class="badge bg-primary">
-                                        <i class="fas fa-check me-1"></i> Activo
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">
-                                        <i class="fas fa-times me-1"></i> Anulado
-                                    </span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <!-- Botón Detalles -->
-                                    <a asp-action="Detalles" asp-route-id="@mantenimiento.idMantenimiento"
-                                       class="btn btn-info btn-sm" style="min-width: 90px;">
-                                        <i class="fas fa-eye me-1"></i> Detalles
-                                    </a>
-
-                                    <!-- Botón Editar -->
-                                    @if (mantenimiento.estadoLogico)
+                        @foreach (var mantenimiento in Model)
+                        {
+                            <tr>
+                                <td><strong>@mantenimiento.codigoMantenimiento</strong></td>
+                                <td>
+                                    <div class="fw-medium">@mantenimiento.placa</div>
+                                    <small class="text-muted">@mantenimiento.marca @mantenimiento.modelo</small>
+                                </td>
+                                <td>@mantenimiento.tipo</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(mantenimiento.descripcion))
                                     {
-                                        <a asp-action="Editar" asp-route-id="@mantenimiento.idMantenimiento"
-                                           class="btn btn-warning btn-sm" style="min-width: 80px;">
-                                            <i class="fas fa-edit me-1"></i> Editar
-                                        </a>
+                                        <span class="text-muted" title="@mantenimiento.descripcion">
+                                            @(mantenimiento.descripcion.Length > 30 ? mantenimiento.descripcion.Substring(0, 30) + "..." : mantenimiento.descripcion)
+                                        </span>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-warning btn-sm" style="min-width: 80px;" disabled>
-                                            <i class="fas fa-edit me-1"></i> Editar
-                                        </button>
+                                        <span class="text-muted fst-italic">Sin descripción</span>
                                     }
-
-                                    <!-- Botón Anular/Habilitar (solo Admin) -->
-                                    @if (ViewBag.Rol == "Admin")
+                                </td>
+                                <td>@mantenimiento.fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@mantenimiento.usuarioNombre</td>
+                                <td>
+                                    @if (mantenimiento.estadoLogico)
                                     {
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-check me-1"></i> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-times me-1"></i> Anulado
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <!-- Botón Detalles -->
+                                        <a asp-action="Detalles" asp-route-id="@mantenimiento.idMantenimiento"
+                                           class="btn btn-info btn-sm" style="min-width: 90px;">
+                                            <i class="fas fa-eye me-1"></i> Detalles
+                                        </a>
+
+                                        <!-- Botón Editar -->
                                         @if (mantenimiento.estadoLogico)
                                         {
-                                            <form asp-action="Eliminar" method="post" style="display: inline;">
-                                                <input type="hidden" name="id" value="@mantenimiento.idMantenimiento" />
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                        style="min-width: 110px;"
-                                                        onclick="return confirm('¿Estás seguro de anular el mantenimiento @mantenimiento.codigoMantenimiento?');">
-                                                    <i class="fas fa-ban me-1"></i> Anular
-                                                </button>
-                                            </form>
+                                            <a asp-action="Editar" asp-route-id="@mantenimiento.idMantenimiento"
+                                               class="btn btn-warning btn-sm" style="min-width: 80px;">
+                                                <i class="fas fa-edit me-1"></i> Editar
+                                            </a>
                                         }
                                         else
                                         {
-                                            <form asp-action="Habilitar" method="post" style="display: inline;">
-                                                <input type="hidden" name="id" value="@mantenimiento.idMantenimiento" />
-                                                <button type="submit" class="btn btn-success btn-sm"
-                                                        style="min-width: 110px;"
-                                                        onclick="return confirm('¿Estás seguro de habilitar el mantenimiento @mantenimiento.codigoMantenimiento?');">
-                                                    <i class="fas fa-check-circle me-1"></i> Habilitar
-                                                </button>
-                                            </form>
+                                            <button class="btn btn-warning btn-sm" style="min-width: 80px;" disabled>
+                                                <i class="fas fa-edit me-1"></i> Editar
+                                            </button>
                                         }
-                                    }
-                                </div>
-                            </td>
-                        </tr>
+
+                                        <!-- Botón Anular/Habilitar (solo Admin) -->
+                                        @if (ViewBag.Rol == "Admin")
+                                        {
+                                            @if (mantenimiento.estadoLogico)
+                                            {
+                                                <form asp-action="Eliminar" method="post" style="display: inline;">
+                                                    <input type="hidden" name="id" value="@mantenimiento.idMantenimiento" />
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            style="min-width: 110px;"
+                                                            onclick="return confirm('¿Estás seguro de anular el mantenimiento @mantenimiento.codigoMantenimiento?');">
+                                                        <i class="fas fa-ban me-1"></i> Anular
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="Habilitar" method="post" style="display: inline;">
+                                                    <input type="hidden" name="id" value="@mantenimiento.idMantenimiento" />
+                                                    <button type="submit" class="btn btn-success btn-sm"
+                                                            style="min-width: 110px;"
+                                                            onclick="return confirm('¿Estás seguro de habilitar el mantenimiento @mantenimiento.codigoMantenimiento?');">
+                                                        <i class="fas fa-check-circle me-1"></i> Habilitar
+                                                    </button>
+                                                </form>
+                                            }
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     }
-                    @if (!Model.Any())
+                    else
                     {
                         <tr>
                             <td colspan="8" class="text-center py-4">
@@ -297,6 +298,54 @@
                     }
                 </tbody>
             </table>
+
+            <!-- Paginación -->
+            @if (ViewBag.TotalPaginas > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaActual - 1)"
+                               asp-route-filtroCodigo="@ViewBag.FiltroCodigo"
+                               asp-route-filtroVehiculo="@ViewBag.FiltroVehiculo"
+                               asp-route-filtroTipo="@ViewBag.FiltroTipo"
+                               asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                               asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta"
+                               asp-route-filtroEstado="@ViewBag.FiltroEstado">
+                                Anterior
+                            </a>
+                        </li>
+                        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pagina="@i"
+                                   asp-route-filtroCodigo="@ViewBag.FiltroCodigo"
+                                   asp-route-filtroVehiculo="@ViewBag.FiltroVehiculo"
+                                   asp-route-filtroTipo="@ViewBag.FiltroTipo"
+                                   asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                                   asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta"
+                                   asp-route-filtroEstado="@ViewBag.FiltroEstado">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaActual + 1)"
+                               asp-route-filtroCodigo="@ViewBag.FiltroCodigo"
+                               asp-route-filtroVehiculo="@ViewBag.FiltroVehiculo"
+                               asp-route-filtroTipo="@ViewBag.FiltroTipo"
+                               asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                               asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta"
+                               asp-route-filtroEstado="@ViewBag.FiltroEstado">
+                                Siguiente
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
         </div>
     </div>
 </div>
@@ -341,5 +390,25 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
         height: calc(1.5em + 0.5rem + 2px);
+    }
+
+    .pagination {
+        margin-top: 20px;
+        margin-bottom: 0;
+    }
+
+    .page-link {
+        color: #1a237e;
+        border-color: #1a237e;
+    }
+
+    .page-item.active .page-link {
+        background-color: #1a237e;
+        border-color: #1a237e;
+    }
+
+    .page-link:hover {
+        color: #1a237e;
+        background-color: #e8eaf6;
     }
 </style>

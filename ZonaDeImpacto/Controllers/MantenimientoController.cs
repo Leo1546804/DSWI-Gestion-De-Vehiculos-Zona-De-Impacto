@@ -16,20 +16,19 @@ namespace ZonaDeImpacto.Controllers
             _repo = repo;
         }
 
-        // Listar Mantenimientos con filtros
+        // Listar Mantenimientos con paginación simple (como el ejemplo de productos)
         [HttpGet]
-        public async Task<IActionResult> Index(
-            int? filtroCodigo = null,
-            int? filtroVehiculo = null,
-            string filtroTipo = null,
-            DateTime? filtroFechaDesde = null,
-            DateTime? filtroFechaHasta = null,
-            string filtroEstado = null)
+        public async Task<IActionResult> Index(int pagina = 1)
         {
+            int pageSize = 6; // Cantidad de mantenimientos por página
+
             // Obtener datos de sesión
             var idUsuario = HttpContext.Session.GetInt32("idUsuario");
             var rol = HttpContext.Session.GetString("rol");
             var nombreUsuario = HttpContext.Session.GetString("nombre");
+
+            ViewBag.Rol = rol;
+            ViewBag.NombreUsuario = nombreUsuario;
 
             // Si es Trabajador, solo puede ver sus mantenimientos
             int? idUsuarioFiltro = null;
@@ -38,26 +37,22 @@ namespace ZonaDeImpacto.Controllers
                 idUsuarioFiltro = idUsuario.Value;
             }
 
-            // Pasar filtros a la vista
-            ViewBag.FiltroCodigo = filtroCodigo;
-            ViewBag.FiltroVehiculo = filtroVehiculo;
-            ViewBag.FiltroTipo = filtroTipo;
-            ViewBag.FiltroFechaDesde = filtroFechaDesde?.ToString("yyyy-MM-dd");
-            ViewBag.FiltroFechaHasta = filtroFechaHasta?.ToString("yyyy-MM-dd");
-            ViewBag.FiltroEstado = filtroEstado;
-            ViewBag.Rol = rol;
-            ViewBag.NombreUsuario = nombreUsuario;
+            // Obtener datos con paginación
+            var (mantenimientos, totalRegistros) = await _repo.ListarMantenimientosPaginadoAsync(
+                pagina: pagina,
+                tamanoPagina: pageSize,
+                idUsuarioFiltro: idUsuarioFiltro); // Solo pasamos el filtro de usuario si es Trabajador
 
-            // Datos para los dropdowns
+            // Calcular total de páginas
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = (int)Math.Ceiling((double)totalRegistros / pageSize);
+            ViewBag.TotalRegistros = totalRegistros;
+
+            // Datos para los dropdowns de filtros (si decides agregarlos después)
             ViewBag.Vehiculos = await _repo.ObtenerVehiculosAsync();
             ViewBag.Tipos = _repo.ObtenerTiposMantenimiento();
 
-            // Obtener lista filtrada
-            var lista = await _repo.ListarMantenimientosAsync(
-                filtroCodigo, filtroVehiculo, filtroTipo,
-                filtroFechaDesde, filtroFechaHasta, filtroEstado, idUsuarioFiltro);
-
-            return View(lista);
+            return View(mantenimientos);
         }
 
         // Crear - GET
@@ -111,7 +106,7 @@ namespace ZonaDeImpacto.Controllers
                 // Redirigir según rol
                 return rol == "Trabajador"
                     ? RedirectToAction("Index", "Home")  // Trabajador => Home
-                    : RedirectToAction("Index");         // Admin =z Index de Mantenimientos
+                    : RedirectToAction("Index");         // Admin => Index de Mantenimientos
             }
             catch (Exception ex)
             {
