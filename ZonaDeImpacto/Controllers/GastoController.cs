@@ -10,15 +10,17 @@ namespace ZonaDeImpacto.Controllers
     public class GastoController : Controller
     {
         private readonly GastoRepository _repo;
+        private const int TAMANO_PAGINA = 6; // 6 registros por página
 
         public GastoController(GastoRepository repo)
         {
             _repo = repo;
         }
 
-        // Listar Gastos con filtros
+        // Listar Gastos con filtros Y PAGINACIÓN
         [HttpGet]
         public async Task<IActionResult> Index(
+            int pagina = 1,
             string filtroMantenimientoCodigo = null,
             int? filtroTipoGasto = null,
             string filtroUsuario = null,
@@ -36,6 +38,25 @@ namespace ZonaDeImpacto.Controllers
                 idUsuarioFiltro = idUsuario.Value;
             }
 
+            // Obtener datos con paginación
+            var (gastos, totalRegistros) = await _repo.ListarGastosPaginadoAsync(
+                pagina: pagina,
+                tamanoPagina: TAMANO_PAGINA,
+                filtroMantenimientoCodigo: filtroMantenimientoCodigo,
+                filtroTipoGasto: filtroTipoGasto,
+                filtroUsuario: filtroUsuario,
+                filtroFechaDesde: filtroFechaDesde,
+                filtroFechaHasta: filtroFechaHasta,
+                idUsuarioFiltro: idUsuarioFiltro);
+
+            // Calcular total de páginas
+            int totalPaginas = totalRegistros > 0 ? (int)Math.Ceiling((double)totalRegistros / TAMANO_PAGINA) : 1;
+
+            // Pasar datos de paginación a la vista
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalRegistros;
+
             // Pasar filtros a la vista
             ViewBag.FiltroMantenimientoCodigo = filtroMantenimientoCodigo;
             ViewBag.FiltroTipoGasto = filtroTipoGasto;
@@ -48,13 +69,10 @@ namespace ZonaDeImpacto.Controllers
             ViewBag.TiposGasto = await _repo.ObtenerTiposGastoAsync();
             ViewBag.Usuarios = await _repo.ObtenerUsuariosAsync();
 
-            // Obtener lista filtrada
-            var lista = await _repo.ListarGastosAsync(
-                filtroMantenimientoCodigo, filtroTipoGasto, filtroUsuario,
-                filtroFechaDesde, filtroFechaHasta, idUsuarioFiltro);
-
-            return View(lista);
+            return View(gastos);
         }
+
+        
         // Crear - GET
         public async Task<IActionResult> Crear()
         {

@@ -13,8 +13,10 @@ namespace ZonaDeImpacto.Data
             _connectionString = configuration.GetConnectionString("conexion");
         }
 
-        // Listar gastos con filtros
-        public async Task<List<Gasto>> ListarGastosAsync(
+        // Listar gastos con filtros Y PAGINACIÓN
+        public async Task<(List<Gasto> Gastos, int TotalRegistros)> ListarGastosPaginadoAsync(
+            int pagina = 1,
+            int tamanoPagina = 6,
             string filtroMantenimientoCodigo = null,
             int? filtroTipoGasto = null,
             string filtroUsuario = null,
@@ -23,12 +25,18 @@ namespace ZonaDeImpacto.Data
             int? idUsuarioFiltro = null)
         {
             List<Gasto> lista = new List<Gasto>();
+            int totalRegistros = 0;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarGastos", conn))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ListarGastosPaginado", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
+                // Parámetros de paginación
+                cmd.Parameters.AddWithValue("@Pagina", pagina);
+                cmd.Parameters.AddWithValue("@TamanoPagina", tamanoPagina);
+
+                // Parámetros de filtro
                 cmd.Parameters.AddWithValue("@filtroMantenimientoCodigo",
                     string.IsNullOrEmpty(filtroMantenimientoCodigo) ? (object)DBNull.Value : filtroMantenimientoCodigo);
                 cmd.Parameters.AddWithValue("@filtroTipoGasto",
@@ -41,6 +49,13 @@ namespace ZonaDeImpacto.Data
                     filtroFechaHasta.HasValue ? (object)filtroFechaHasta.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("@idUsuarioFiltro",
                     idUsuarioFiltro.HasValue ? (object)idUsuarioFiltro.Value : DBNull.Value);
+
+                // Parámetro de salida para total de registros
+                SqlParameter totalRegistrosParam = new SqlParameter("@TotalRegistros", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(totalRegistrosParam);
 
                 await conn.OpenAsync();
 
@@ -64,12 +79,40 @@ namespace ZonaDeImpacto.Data
                         });
                     }
                 }
+
+                // Obtener el valor del parámetro de salida
+                totalRegistros = totalRegistrosParam.Value != DBNull.Value ? (int)totalRegistrosParam.Value : 0;
             }
-            return lista;
+
+            return (lista, totalRegistros);
         }
 
-        // Obtener mantenimientos activos para dropdown
-        public async Task<List<Mantenimiento>> ObtenerMantenimientosAsync()
+        // Listar gastos con filtros (sin paginación - para compatibilidad)
+        public async Task<List<Gasto>> ListarGastosAsync(
+            string filtroMantenimientoCodigo = null,
+            int? filtroTipoGasto = null,
+            string filtroUsuario = null,
+            DateTime? filtroFechaDesde = null,
+            DateTime? filtroFechaHasta = null,
+            int? idUsuarioFiltro = null)
+        {
+            // Usar paginación con tamaño máximo para simular "todos"
+            var (gastos, _) = await ListarGastosPaginadoAsync(
+                pagina: 1,
+                tamanoPagina: int.MaxValue,
+                filtroMantenimientoCodigo: filtroMantenimientoCodigo,
+                filtroTipoGasto: filtroTipoGasto,
+                filtroUsuario: filtroUsuario,
+                filtroFechaDesde: filtroFechaDesde,
+                filtroFechaHasta: filtroFechaHasta,
+                idUsuarioFiltro: idUsuarioFiltro);
+
+            return gastos;
+        }
+
+
+// Obtener mantenimientos activos para dropdown
+public async Task<List<Mantenimiento>> ObtenerMantenimientosAsync()
         {
             List<Mantenimiento> lista = new List<Mantenimiento>();
 
