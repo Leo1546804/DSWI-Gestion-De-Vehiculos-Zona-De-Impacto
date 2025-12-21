@@ -79,6 +79,8 @@
             </div>
 
             <!-- FILTRO 3: Responsable (2) -->
+            @if (ViewBag.Rol == "Admin")
+            {   
             <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Responsable:</label>
                 <select name="filtroUsuario" class="form-select form-select-sm">
@@ -91,8 +93,29 @@
                         </option>
                     }
                 </select>
-            </div>
-
+                </div>
+            }
+            else
+            {
+                <div class="col-md-2 col-lg-2">
+                    <label class="form-label mb-1">Responsable:</label>
+                    <div class="form-control form-control-sm bg-light" style="height: calc(1.5em + 0.5rem + 2px);">
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>
+                            @if (!string.IsNullOrEmpty(ViewBag.NombreUsuario))
+                            {
+                                <span>@ViewBag.NombreUsuario</span>
+                            }
+                            else
+                            {
+                                <span>Usuario actual</span>
+                            }
+                        </small>
+                        <!-- Campo oculto para mantener el valor del filtro -->
+                        <input type="hidden" name="filtroUsuario" value="@ViewBag.IdUsuario" />
+                    </div>
+                </div>
+            }
             <!-- FILTRO 4: Fecha Desde (1) -->
             <div class="col-md-1 col-lg-1">
                 <label class="form-label mb-1">Desde:</label>
