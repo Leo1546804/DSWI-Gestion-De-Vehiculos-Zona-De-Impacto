@@ -15,10 +15,12 @@
 <div class="card shadow-sm">
     <div class="card-header text-white" style="background-color: #1a237e;">
         <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-0">
-                    <i class="fas fa-list-alt me-2"></i>@ViewData["Title"]
-                </h5>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-list-alt fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0">@ViewData["Title"]</h5>
+                    <small class="opacity-75">Gestión de tipos de gasto vehicular</small>
+                </div>
             </div>
             <div>
                 <a asp-action="Crear" class="btn btn-success px-4">
@@ -31,14 +33,17 @@
     <!-- SECCIÓN DE FILTROS - DISTRIBUCIÓN IDÉNTICA A VEHÍCULOS -->
     <div class="card-body border-bottom py-3">
         <form method="get" class="row align-items-end">
-            <!-- FILTRO 1: Nombre (posición de Placa en Vehículos) -->
+            <!-- Campo oculto para mantener la página actual -->
+            <input type="hidden" name="pagina" value="@ViewBag.PaginaActual" />
+
+            <!-- FILTRO 1: Nombre (2) -->
             <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Nombre:</label>
                 <input type="text" name="filtroNombre" class="form-control form-control-sm"
                        placeholder="Ej: Combustible" value="@ViewBag.FiltroNombre" />
             </div>
 
-            <!-- FILTRO 2: Estado (posición de Marca en Vehículos) -->
+            <!-- FILTRO 2: Estado (2) -->
             <div class="col-md-2 col-lg-2">
                 <label class="form-label mb-1">Estado:</label>
                 <select name="filtroEstado" class="form-select form-select-sm">
@@ -48,24 +53,31 @@
                 </select>
             </div>
 
-            <!-- FILTRO 3: VACÍO (posición de Año en Vehículos - col-md-1 col-lg-1) -->
-            <div class="col-md-1 col-lg-1">
-                <!-- Espacio reservado para mantener distribución -->
-            </div>
-
-            <!-- FILTRO 4: VACÍO (posición de Estado Vehículo en Vehículos - col-md-2 col-lg-2) -->
+            <!-- FILTRO 3: VACÍO (2) -->
             <div class="col-md-2 col-lg-2">
                 <!-- Espacio reservado para mantener distribución -->
             </div>
 
-            <!-- FILTRO 5: VACÍO (posición de Estado General en Vehículos - col-md-2 col-lg-2) -->
-            <div class="col-md-2 col-lg-2">
+            <!-- FILTRO 4: VACÍO (1) -->
+            <div class="col-md-1 col-lg-1">
                 <!-- Espacio reservado para mantener distribución -->
             </div>
 
-            <!-- BOTÓN LIMPIAR (EXACTO IGUAL QUE VEHÍCULOS - col-md-1 col-lg-1) -->
+            <!-- FILTRO 5: VACÍO (1) -->
             <div class="col-md-1 col-lg-1">
-                @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) || !string.IsNullOrEmpty(ViewBag.FiltroEstado))
+                <!-- Espacio reservado para mantener distribución -->
+            </div>
+
+            <!-- FILTRO 6: VACÍO (1) -->
+            <div class="col-md-1 col-lg-1">
+                <!-- Espacio reservado para mantener distribución -->
+            </div>
+
+            <!-- BOTÓN LIMPIAR (1) -->
+            <div class="col-md-1 col-lg-1">
+                @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) ||
+                                !string.IsNullOrEmpty(ViewBag.FiltroEstado) ||
+                                (ViewBag.PaginaActual > 1))
                 {
                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm w-100 py-1">
                         <i class="fas fa-times me-1"></i> Limpiar
@@ -77,7 +89,7 @@
                 }
             </div>
 
-            <!-- BOTÓN FILTRAR (EXACTO IGUAL QUE VEHÍCULOS - col-md-1 col-lg-1) -->
+            <!-- BOTÓN FILTRAR (1) -->
             <div class="col-md-1 col-lg-1">
                 <button type="submit" class="btn btn-sm w-100 py-1"
                         style="background-color: #283593; border-color: #283593; color: white;">
@@ -99,91 +111,93 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @{
+                    @if (Model != null && Model.Any())
+                    {
                         // Primero los activos, luego los inactivos
                         var tiposOrdenados = Model
                         .OrderByDescending(t => t.estadoLogico)  // Activos primero
                         .ThenBy(t => t.nombre);                  // Luego orden alfabético
-                    }
 
-                    @foreach (var tipo in tiposOrdenados)
-                    {
-                        <tr>
-                            <td><strong>@tipo.nombre</strong></td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(tipo.descripcion))
-                                {
-                                    <span class="text-muted">@tipo.descripcion</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted fst-italic">Sin descripción</span>
-                                }
-                            </td>
-                            <td>
-                                @if (tipo.estadoLogico)
-                                {
-                                    <span class="badge bg-primary">
-                                        <i class="fas fa-check me-1"></i> Activo
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">
-                                        <i class="fas fa-times me-1"></i> Inactivo
-                                    </span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <!-- Botón Detalles -->
-                                    <a asp-action="Detalles"
-                                       asp-route-id="@tipo.idTipoGasto"
-                                       asp-route-filtroEstado="@ViewBag.FiltroEstado"
-                                       class="btn btn-info btn-sm" style="min-width: 90px;">
-                                        <i class="fas fa-eye me-1"></i> Detalles
-                                    </a>
-
-                                    <!-- Botón Editar -->
-                                    <a asp-action="Editar"
-                                       asp-route-id="@tipo.idTipoGasto"
-                                       asp-route-filtroEstado="@ViewBag.FiltroEstado"
-                                       class="btn btn-warning btn-sm" style="min-width: 80px;">
-                                        <i class="fas fa-edit me-1"></i> Editar
-                                    </a>
-
-                                    <!-- Botón Deshabilitar/Habilitar -->
-                                    @if (tipo.estadoLogico)
+                        @foreach (var tipo in tiposOrdenados)
+                        {
+                            <tr>
+                                <td><strong>@tipo.nombre</strong></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(tipo.descripcion))
                                     {
-                                        <a asp-action="Eliminar"
-                                           asp-route-id="@tipo.idTipoGasto"
-                                           asp-route-filtroEstado="@ViewBag.FiltroEstado"
-                                           class="btn btn-danger btn-sm" style="min-width: 110px;"
-                                           onclick="return confirm('¿Estás seguro de desactivar el tipo de gasto @tipo.nombre?');">
-                                            <i class="fas fa-user-slash me-1"></i> Desactivar
-                                        </a>
+                                        <span class="text-muted">
+                                            @(tipo.descripcion.Length > 50 ? tipo.descripcion.Substring(0, 50) + "..." : tipo.descripcion)
+                                        </span>
                                     }
                                     else
                                     {
-                                        <a asp-action="Habilitar"
-                                           asp-route-id="@tipo.idTipoGasto"
-                                           asp-route-filtroEstado="@ViewBag.FiltroEstado"
-                                           class="btn btn-success btn-sm" style="min-width: 110px;"
-                                           onclick="return confirm('¿Estás seguro de habilitar el tipo de gasto @tipo.nombre?');">
-                                            <i class="fas fa-user-check me-1"></i> Habilitar
-                                        </a>
+                                        <span class="text-muted fst-italic">Sin descripción</span>
                                     }
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                                <td>
+                                    @if (tipo.estadoLogico)
+                                    {
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-check me-1"></i> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-times me-1"></i> Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <!-- Botón Detalles -->
+                                        <a asp-action="Detalles" asp-route-id="@tipo.idTipoGasto"
+                                           class="btn btn-info btn-sm" style="min-width: 90px;">
+                                            <i class="fas fa-eye me-1"></i> Detalles
+                                        </a>
+
+                                        <!-- Botón Editar -->
+                                        <a asp-action="Editar" asp-route-id="@tipo.idTipoGasto"
+                                           class="btn btn-warning btn-sm" style="min-width: 80px;">
+                                            <i class="fas fa-edit me-1"></i> Editar
+                                        </a>
+
+                                        <!-- Botón Deshabilitar/Habilitar -->
+                                        @if (tipo.estadoLogico)
+                                        {
+                                            <form asp-action="Eliminar" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@tipo.idTipoGasto" />
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        style="min-width: 110px;"
+                                                        onclick="return confirm('¿Estás seguro de desactivar el tipo de gasto @tipo.nombre?');">
+                                                    <i class="fas fa-user-slash me-1"></i> Desactivar
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Habilitar" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@tipo.idTipoGasto" />
+                                                <button type="submit" class="btn btn-success btn-sm"
+                                                        style="min-width: 110px;"
+                                                        onclick="return confirm('¿Estás seguro de habilitar el tipo de gasto @tipo.nombre?');">
+                                                    <i class="fas fa-user-check me-1"></i> Habilitar
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     }
-                    @if (!Model.Any())
+                    else
                     {
                         <tr>
                             <td colspan="4" class="text-center py-4">
-                                <i class="fas fa-info-circle fa-lg text-muted mb-2"></i>
+                                <i class="fas fa-list-alt fa-2x text-muted mb-2"></i>
                                 <p class="text-muted mb-0">
-                                    @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) || !string.IsNullOrEmpty(ViewBag.FiltroEstado))
+                                    @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) ||
+                                                                    !string.IsNullOrEmpty(ViewBag.FiltroEstado))
                                     {
                                         <span>No hay tipos de gasto que coincidan con los filtros aplicados</span>
                                     }
@@ -192,7 +206,8 @@
                                         <span>No hay tipos de gasto registrados</span>
                                     }
                                 </p>
-                                @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) || !string.IsNullOrEmpty(ViewBag.FiltroEstado))
+                                @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) ||
+                                                            !string.IsNullOrEmpty(ViewBag.FiltroEstado))
                                 {
                                     <a href="@Url.Action("Index")" class="btn btn-outline-primary btn-sm mt-2">
                                         <i class="fas fa-times me-1"></i> Limpiar filtros
@@ -209,6 +224,52 @@
                     }
                 </tbody>
             </table>
+
+            @if (ViewBag.TotalPaginas > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaActual - 1)"
+                               asp-route-filtroNombre="@ViewBag.FiltroNombre"
+                               asp-route-filtroEstado="@ViewBag.FiltroEstado">
+                                Anterior
+                            </a>
+                        </li>
+                        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pagina="@i"
+                                   asp-route-filtroNombre="@ViewBag.FiltroNombre"
+                                   asp-route-filtroEstado="@ViewBag.FiltroEstado">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaActual + 1)"
+                               asp-route-filtroNombre="@ViewBag.FiltroNombre"
+                               asp-route-filtroEstado="@ViewBag.FiltroEstado">
+                                Siguiente
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+            <!-- Mostrar información de paginación -->
+            @if (ViewBag.TotalRegistros > 0)
+            {
+                <div class="text-center text-muted mt-2">
+                    <small>
+                        Mostrando @(((ViewBag.PaginaActual - 1) * 6 + 1)) a
+                        @Math.Min(ViewBag.PaginaActual * 6, ViewBag.TotalRegistros)
+                        de @ViewBag.TotalRegistros gastos
+                    </small>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -237,16 +298,11 @@
         gap: 10px !important;
     }
 
-    .card {
-        border-radius: 8px;
-    }
-
     .badge {
         font-size: 12px;
         padding: 4px 8px;
     }
 
-    /* Estilos para filtros */
     .form-label {
         font-weight: 500;
         font-size: 0.85rem;
@@ -260,8 +316,24 @@
         height: calc(1.5em + 0.5rem + 2px);
     }
 
-    .border-bottom {
-        border-bottom: 1px solid rgba(0,0,0,.125);
+    .pagination {
+        margin-top: 20px;
+        margin-bottom: 0;
+    }
+
+    .page-link {
+        color: #1a237e;
+        border-color: #1a237e;
+    }
+
+    .page-item.active .page-link {
+        background-color: #1a237e;
+        border-color: #1a237e;
+    }
+
+    .page-link:hover {
+        color: #1a237e;
+        background-color: #e8eaf6;
     }
 
     .col-md-1.col-lg-1 .btn-sm {

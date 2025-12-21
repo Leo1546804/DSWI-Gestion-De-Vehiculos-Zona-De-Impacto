@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <!-- SECCIÓN DE FILTROS - DISTRIBUCIÓN: 2+2+2+1+1+1+1+1 = 11 columnas -->
+    <!-- SECCIÓN DE FILTROS -->
     <div class="card-body border-bottom py-3">
         <form method="get" class="row align-items-end">
             <!-- Campo oculto para mantener la página actual -->
@@ -232,6 +232,16 @@
                                             {
                                                 <form asp-action="Eliminar" method="post" style="display: inline;">
                                                     <input type="hidden" name="id" value="@mantenimiento.idMantenimiento" />
+                                                    <input type="hidden" name="returnUrl" 
+                                                           value="@Url.Action("Index", new { 
+                                                                pagina = ViewBag.PaginaActual,
+                                                                filtroCodigo = ViewBag.FiltroCodigo,
+                                                                filtroVehiculo = ViewBag.FiltroVehiculo,
+                                                                filtroTipo = ViewBag.FiltroTipo,
+                                                                filtroFechaDesde = ViewBag.FiltroFechaDesde,
+                                                                filtroFechaHasta = ViewBag.FiltroFechaHasta,
+                                                                filtroEstado = ViewBag.FiltroEstado
+                                                           })" />
                                                     <button type="submit" class="btn btn-danger btn-sm"
                                                             style="min-width: 110px;"
                                                             onclick="return confirm('¿Estás seguro de anular el mantenimiento @mantenimiento.codigoMantenimiento?');">
@@ -243,6 +253,16 @@
                                             {
                                                 <form asp-action="Habilitar" method="post" style="display: inline;">
                                                     <input type="hidden" name="id" value="@mantenimiento.idMantenimiento" />
+                                                    <input type="hidden" name="returnUrl" 
+                                                           value="@Url.Action("Index", new { 
+                                                                pagina = ViewBag.PaginaActual,
+                                                                filtroCodigo = ViewBag.FiltroCodigo,
+                                                                filtroVehiculo = ViewBag.FiltroVehiculo,
+                                                                filtroTipo = ViewBag.FiltroTipo,
+                                                                filtroFechaDesde = ViewBag.FiltroFechaDesde,
+                                                                filtroFechaHasta = ViewBag.FiltroFechaHasta,
+                                                                filtroEstado = ViewBag.FiltroEstado
+                                                           })" />
                                                     <button type="submit" class="btn btn-success btn-sm"
                                                             style="min-width: 110px;"
                                                             onclick="return confirm('¿Estás seguro de habilitar el mantenimiento @mantenimiento.codigoMantenimiento?');">
@@ -345,6 +365,17 @@
                         </li>
                     </ul>
                 </nav>
+            }
+            <!-- Mostrar información de paginación -->
+            @if (ViewBag.TotalRegistros > 0)
+            {
+                <div class="text-center text-muted mt-2">
+                    <small>
+                        Mostrando @(((ViewBag.PaginaActual - 1) * 6 + 1)) a
+                        @Math.Min(ViewBag.PaginaActual * 6, ViewBag.TotalRegistros)
+                        de @ViewBag.TotalRegistros mantenimientos
+                    </small>
+                </div>
             }
         </div>
     </div>

@@ -50,11 +50,11 @@
         </div>
     </div>
 
-    <!-- SECCIÓN DE FILTROS - DISTRIBUCIÓN: 2+2+2+1+1+1+1 = 10 columnas -->
+    <!-- SECCIÓN DE FILTROS -->
     <div class="card-body border-bottom py-3">
         <form method="get" class="row align-items-end">
             <!-- Campo oculto para mantener la página actual -->
-            <input type="hidden" name="pagina" value="@ViewBag.PaginaActual" />
+            <input type="hidden" name="pagina" value="1" /> <!-- Siempon en 1 al filtrar -->
 
             <!-- FILTRO 1: Código Mantenimiento (2) -->
             <div class="col-md-2 col-lg-2">
@@ -80,19 +80,19 @@
 
             <!-- FILTRO 3: Responsable (2) -->
             @if (ViewBag.Rol == "Admin")
-            {   
-            <div class="col-md-2 col-lg-2">
-                <label class="form-label mb-1">Responsable:</label>
-                <select name="filtroUsuario" class="form-select form-select-sm">
-                    <option value="">Todos</option>
-                    @foreach (var usuario in ViewBag.Usuarios)
-                    {
-                        <option value="@usuario.idUsuario"
-                                selected="@(ViewBag.FiltroUsuario?.ToString() == usuario.idUsuario.ToString())">
-                            @usuario.nombreCompleto
-                        </option>
-                    }
-                </select>
+            {
+                <div class="col-md-2 col-lg-2">
+                    <label class="form-label mb-1">Responsable:</label>
+                    <select name="filtroUsuario" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        @foreach (var usuario in ViewBag.Usuarios)
+                        {
+                            <option value="@usuario.idUsuario"
+                                    selected="@(ViewBag.FiltroUsuario?.ToString() == usuario.idUsuario.ToString())">
+                                @usuario.nombreCompleto
+                            </option>
+                        }
+                    </select>
                 </div>
             }
             else
@@ -142,8 +142,7 @@
                     !string.IsNullOrEmpty(ViewBag.FiltroTipoGasto?.ToString()) ||
                     !string.IsNullOrEmpty(ViewBag.FiltroUsuario?.ToString()) ||
                     !string.IsNullOrEmpty(ViewBag.FiltroFechaDesde) ||
-                    !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta) ||
-                    (ViewBag.PaginaActual > 1);
+                    !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta);
                 }
 
                 @if (hayFiltros)
@@ -168,7 +167,6 @@
         </form>
     </div>
 
-    <!-- Tabla de Gastos -->
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -186,7 +184,7 @@
                 <tbody>
                     @if (Model != null && Model.Any())
                     {
-                        @foreach (var gasto in Model.OrderByDescending(g => g.fecha))
+                        @foreach (var gasto in Model)
                         {
                             <tr>
                                 <td>
@@ -220,7 +218,14 @@
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
                                         <!-- Botón Detalles -->
-                                        <a asp-action="Detalles" asp-route-id="@gasto.idGasto"
+                                        <a asp-action="Detalles"
+                                           asp-route-id="@gasto.idGasto"
+                                           asp-route-pagina="@ViewBag.PaginaActual"
+                                           asp-route-filtroMantenimientoCodigo="@ViewBag.FiltroMantenimientoCodigo"
+                                           asp-route-filtroTipoGasto="@ViewBag.FiltroTipoGasto"
+                                           asp-route-filtroUsuario="@ViewBag.FiltroUsuario"
+                                           asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                                           asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta"
                                            class="btn btn-info btn-sm" style="min-width: 90px;">
                                             <i class="fas fa-eye me-1"></i> Detalles
                                         </a>
@@ -228,7 +233,14 @@
                                         <!-- Botón Editar -->
                                         @if (gasto.mantenimientoActivo)
                                         {
-                                            <a asp-action="Editar" asp-route-id="@gasto.idGasto"
+                                            <a asp-action="Editar"
+                                               asp-route-id="@gasto.idGasto"
+                                               asp-route-pagina="@ViewBag.PaginaActual"
+                                               asp-route-filtroMantenimientoCodigo="@ViewBag.FiltroMantenimientoCodigo"
+                                               asp-route-filtroTipoGasto="@ViewBag.FiltroTipoGasto"
+                                               asp-route-filtroUsuario="@ViewBag.FiltroUsuario"
+                                               asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                                               asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta"
                                                class="btn btn-warning btn-sm" style="min-width: 80px;">
                                                 <i class="fas fa-edit me-1"></i> Editar
                                             </a>
@@ -245,6 +257,15 @@
                                         {
                                             <form asp-action="Eliminar" method="post" style="display: inline;">
                                                 <input type="hidden" name="id" value="@gasto.idGasto" />
+                                                <input type="hidden" name="returnUrl" 
+                                                       value="@Url.Action("Index", new { 
+                                                            pagina = ViewBag.PaginaActual,
+                                                            filtroMantenimientoCodigo = ViewBag.FiltroMantenimientoCodigo,
+                                                            filtroTipoGasto = ViewBag.FiltroTipoGasto,
+                                                            filtroUsuario = ViewBag.FiltroUsuario,
+                                                            filtroFechaDesde = ViewBag.FiltroFechaDesde,
+                                                            filtroFechaHasta = ViewBag.FiltroFechaHasta
+                                                       })" />
                                                 <button type="submit" class="btn btn-danger btn-sm"
                                                         style="min-width: 90px;"
                                                         onclick="return confirm('¿Estás seguro de eliminar este gasto?');">
@@ -262,35 +283,83 @@
                         <tr>
                             <td colspan="7" class="text-center py-4">
                                 <i class="fas fa-money-bill-wave fa-2x text-muted mb-2"></i>
-                                <p class="text-muted mb-0">
-                                    @if (!string.IsNullOrEmpty(ViewBag.FiltroMantenimientoCodigo?.ToString()) ||
-                                                                    !string.IsNullOrEmpty(ViewBag.FiltroTipoGasto?.ToString()) ||
-                                                                    !string.IsNullOrEmpty(ViewBag.FiltroUsuario?.ToString()) ||
-                                                                    !string.IsNullOrEmpty(ViewBag.FiltroFechaDesde) ||
-                                                                    !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta))
-                                    {
-                                        <span>No hay gastos que coincidan con los filtros aplicados</span>
-                                    }
-                                    else
-                                    {
-                                        <span>No hay gastos registrados</span>
-                                    }
-                                </p>
-                                @if (!string.IsNullOrEmpty(ViewBag.FiltroMantenimientoCodigo?.ToString()) ||
-                                                            !string.IsNullOrEmpty(ViewBag.FiltroTipoGasto?.ToString()) ||
-                                                            !string.IsNullOrEmpty(ViewBag.FiltroUsuario?.ToString()) ||
-                                                            !string.IsNullOrEmpty(ViewBag.FiltroFechaDesde) ||
-                                                            !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta))
+                                @{
+                                    bool filtrosActivos = !string.IsNullOrEmpty(ViewBag.FiltroMantenimientoCodigo) ||
+                                    (ViewBag.FiltroTipoGasto != null && ViewBag.FiltroTipoGasto > 0) ||
+                                    (ViewBag.FiltroUsuario != null && ViewBag.FiltroUsuario > 0) ||
+                                    !string.IsNullOrEmpty(ViewBag.FiltroFechaDesde) ||
+                                    !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta);
+                                }
+                                
+                                @if (filtrosActivos)
                                 {
-                                    <a href="@Url.Action("Index")" class="btn btn-outline-primary btn-sm mt-2">
+                                    <p class="text-muted mb-0">
+                                        No hay gastos que coincidan con los filtros aplicados
+                                    </p>
+                                    <div class="mt-2">
+                                        @if (ViewBag.FiltroUsuario != null && ViewBag.Usuarios != null)
+                                        {
+                                            var usuarioSeleccionado = ((IEnumerable<dynamic>)ViewBag.Usuarios)?
+                                                .FirstOrDefault(u => u.idUsuario == ViewBag.FiltroUsuario);
+                                            if (usuarioSeleccionado != null)
+                                            {
+                                                <small class="text-info">
+                                                    <i class="fas fa-user me-1"></i> 
+                                                    Responsable: @usuarioSeleccionado.nombreCompleto
+                                                </small>
+                                                <br />
+                                            }
+                                        }
+                                        @if (!string.IsNullOrEmpty(ViewBag.FiltroMantenimientoCodigo))
+                                        {
+                                            <small class="text-info">
+                                                <i class="fas fa-barcode me-1"></i> 
+                                                Código: @ViewBag.FiltroMantenimientoCodigo
+                                            </small>
+                                            <br />
+                                        }
+                                        @if (ViewBag.FiltroTipoGasto != null && ViewBag.TiposGasto != null)
+                                        {
+                                            var tipoSeleccionado = ((IEnumerable<dynamic>)ViewBag.TiposGasto)?
+                                                .FirstOrDefault(t => t.idTipoGasto == ViewBag.FiltroTipoGasto);
+                                            if (tipoSeleccionado != null)
+                                            {
+                                                <small class="text-info">
+                                                    <i class="fas fa-tag me-1"></i> 
+                                                    Tipo: @tipoSeleccionado.nombre
+                                                </small>
+                                                <br />
+                                            }
+                                        }
+                                        @if (!string.IsNullOrEmpty(ViewBag.FiltroFechaDesde) || !string.IsNullOrEmpty(ViewBag.FiltroFechaHasta))
+                                        {
+                                            <small class="text-info">
+                                                <i class="fas fa-calendar me-1"></i> 
+                                                Rango de fechas: 
+                                                @if (!string.IsNullOrEmpty(ViewBag.FiltroFechaDesde))
+                                                {
+                                                    <span>Desde @ViewBag.FiltroFechaDesde</span>
+                                                }
+                                                @if (!string.IsNullOrEmpty(ViewBag.FiltroFechaHasta))
+                                                {
+                                                    <span>Hasta @ViewBag.FiltroFechaHasta</span>
+                                                }
+                                            </small>
+                                        }
+                                    </div>
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-primary btn-sm mt-3">
                                         <i class="fas fa-times me-1"></i> Limpiar filtros
                                     </a>
                                 }
                                 else
                                 {
-                                    <a asp-action="Crear" class="btn btn-success btn-sm mt-2">
-                                        <i class="fas fa-money-bill-wave me-1"></i> Registrar Primer Gasto
-                                    </a>
+                                    <p class="text-muted mb-0">No hay gastos registrados</p>
+                                    @if (ViewBag.Rol != "Trabajador")
+                                    {
+                                        <a asp-action="Crear" class="btn btn-success btn-sm mt-2">
+                                            <i class="fas fa-money-bill-wave me-1"></i> Registrar Primer Gasto
+                                        </a>
+                                    }
                                 }
                             </td>
                         </tr>
@@ -298,11 +367,12 @@
                 </tbody>
             </table>
 
-            <!-- Paginación -->
-            @if (ViewBag.TotalPaginas > 1)
+            <!-- Paginación - SOLO MOSTRAR SI HAY RESULTADOS Y MÁS DE 1 PÁGINA -->
+            @if (Model != null && Model.Any() && ViewBag.TotalPaginas > 1)
             {
                 <nav>
                     <ul class="pagination justify-content-center">
+                        <!-- Botón Anterior -->
                         <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
                             <a class="page-link" asp-action="Index"
                                asp-route-pagina="@(ViewBag.PaginaActual - 1)"
@@ -311,10 +381,34 @@
                                asp-route-filtroUsuario="@ViewBag.FiltroUsuario"
                                asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
                                asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta">
-                                Anterior
+                                <i class="fas fa-chevron-left"></i> Anterior
                             </a>
                         </li>
-                        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+
+                        <!-- Página 1 -->
+                        @if (ViewBag.PaginaActual > 3)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pagina="1"
+                                   asp-route-filtroMantenimientoCodigo="@ViewBag.FiltroMantenimientoCodigo"
+                                   asp-route-filtroTipoGasto="@ViewBag.FiltroTipoGasto"
+                                   asp-route-filtroUsuario="@ViewBag.FiltroUsuario"
+                                   asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                                   asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta">
+                                    1
+                                </a>
+                            </li>
+                            @if (ViewBag.PaginaActual > 4)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                        }
+
+                        <!-- Páginas alrededor de la actual -->
+                        @for (int i = Math.Max(1, ViewBag.PaginaActual - 2); i <= Math.Min(ViewBag.TotalPaginas, ViewBag.PaginaActual + 2); i++)
                         {
                             <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
                                 <a class="page-link" asp-action="Index"
@@ -328,6 +422,30 @@
                                 </a>
                             </li>
                         }
+
+                        <!-- Última página -->
+                        @if (ViewBag.PaginaActual < ViewBag.TotalPaginas - 2)
+                        {
+                            @if (ViewBag.PaginaActual < ViewBag.TotalPaginas - 3)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pagina="@ViewBag.TotalPaginas"
+                                   asp-route-filtroMantenimientoCodigo="@ViewBag.FiltroMantenimientoCodigo"
+                                   asp-route-filtroTipoGasto="@ViewBag.FiltroTipoGasto"
+                                   asp-route-filtroUsuario="@ViewBag.FiltroUsuario"
+                                   asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
+                                   asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta">
+                                    @ViewBag.TotalPaginas
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Botón Siguiente -->
                         <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
                             <a class="page-link" asp-action="Index"
                                asp-route-pagina="@(ViewBag.PaginaActual + 1)"
@@ -336,15 +454,15 @@
                                asp-route-filtroUsuario="@ViewBag.FiltroUsuario"
                                asp-route-filtroFechaDesde="@ViewBag.FiltroFechaDesde"
                                asp-route-filtroFechaHasta="@ViewBag.FiltroFechaHasta">
-                                Siguiente
+                                Siguiente <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
                     </ul>
                 </nav>
             }
 
-            <!-- Mostrar información de paginación -->
-            @if (ViewBag.TotalRegistros > 0)
+            <!-- Mostrar información de paginación - SOLO SI HAY RESULTADOS -->
+            @if (Model != null && Model.Any() && ViewBag.TotalRegistros > 0)
             {
                 <div class="text-center text-muted mt-2">
                     <small>
@@ -413,10 +531,17 @@
     .page-item.active .page-link {
         background-color: #1a237e;
         border-color: #1a237e;
+        color: white;
     }
 
     .page-link:hover {
         color: #1a237e;
         background-color: #e8eaf6;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #fff;
+        border-color: #dee2e6;
     }
 </style>

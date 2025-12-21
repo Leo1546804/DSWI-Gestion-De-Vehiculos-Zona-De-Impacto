@@ -16,11 +16,18 @@ namespace ZonaDeImpacto.Controllers
             _repo = repo;
         }
 
-        // Listar Mantenimientos con paginación simple (como el ejemplo de productos)
+        // Listar Mantenimientos con paginación y filtros
         [HttpGet]
-        public async Task<IActionResult> Index(int pagina = 1)
+        public async Task<IActionResult> Index(
+            int pagina = 1,
+            string filtroCodigo = null,
+            int? filtroVehiculo = null,
+            string filtroTipo = null,
+            string filtroFechaDesde = null,
+            string filtroFechaHasta = null,
+            string filtroEstado = null)
         {
-            int pageSize = 6; // Cantidad de mantenimientos por página
+            int pageSize = 6; // Debe coincidir con el valor en la vista
 
             // Obtener datos de sesión
             var idUsuario = HttpContext.Session.GetInt32("idUsuario");
@@ -37,18 +44,53 @@ namespace ZonaDeImpacto.Controllers
                 idUsuarioFiltro = idUsuario.Value;
             }
 
-            // Obtener datos con paginación
+            // Convertir fechas de string a DateTime?
+            DateTime? fechaDesde = null;
+            DateTime? fechaHasta = null;
+
+            if (!string.IsNullOrEmpty(filtroFechaDesde) && DateTime.TryParse(filtroFechaDesde, out DateTime parsedDesde))
+            {
+                fechaDesde = parsedDesde;
+            }
+
+            if (!string.IsNullOrEmpty(filtroFechaHasta) && DateTime.TryParse(filtroFechaHasta, out DateTime parsedHasta))
+            {
+                fechaHasta = parsedHasta;
+            }
+
+            // Convertir filtroCodigo de string a int? si es posible
+            int? codigoFiltroInt = null;
+            if (!string.IsNullOrEmpty(filtroCodigo) && int.TryParse(filtroCodigo, out int codigo))
+            {
+                codigoFiltroInt = codigo;
+            }
+
+            // Obtener datos con paginación y filtros
             var (mantenimientos, totalRegistros) = await _repo.ListarMantenimientosPaginadoAsync(
                 pagina: pagina,
                 tamanoPagina: pageSize,
-                idUsuarioFiltro: idUsuarioFiltro); // Solo pasamos el filtro de usuario si es Trabajador
+                filtroCodigo: codigoFiltroInt,
+                filtroVehiculo: filtroVehiculo,
+                filtroTipo: filtroTipo,
+                filtroFechaDesde: fechaDesde,
+                filtroFechaHasta: fechaHasta,
+                filtroEstado: filtroEstado,
+                idUsuarioFiltro: idUsuarioFiltro);
 
             // Calcular total de páginas
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = (int)Math.Ceiling((double)totalRegistros / pageSize);
             ViewBag.TotalRegistros = totalRegistros;
 
-            // Datos para los dropdowns de filtros (si decides agregarlos después)
+            // Guardar los filtros en ViewBag para la vista
+            ViewBag.FiltroCodigo = filtroCodigo;
+            ViewBag.FiltroVehiculo = filtroVehiculo;
+            ViewBag.FiltroTipo = filtroTipo;
+            ViewBag.FiltroFechaDesde = filtroFechaDesde;
+            ViewBag.FiltroFechaHasta = filtroFechaHasta;
+            ViewBag.FiltroEstado = filtroEstado;
+
+            // Datos para los dropdowns de filtros
             ViewBag.Vehiculos = await _repo.ObtenerVehiculosAsync();
             ViewBag.Tipos = _repo.ObtenerTiposMantenimiento();
 
@@ -125,6 +167,12 @@ namespace ZonaDeImpacto.Controllers
             var mantenimiento = await _repo.ObtenerMantenimientoAsync(id);
             if (mantenimiento == null) return NotFound();
 
+            // Construir la returnUrl con los filtros actuales si no se proporciona
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                returnUrl = BuildReturnUrl();
+            }
+
             await CargarDatosParaVista();
             ViewBag.ReturnUrl = returnUrl;
 
@@ -144,25 +192,35 @@ namespace ZonaDeImpacto.Controllers
             await _repo.EditarMantenimientoAsync(mantenimiento);
             TempData["Mensaje"] = "Mantenimiento actualizado correctamente.";
 
-            if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
+            // Si no hay returnUrl, construir una con los filtros actuales
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                returnUrl = BuildReturnUrl();
+            }
 
-            return RedirectToAction("Index");
+            return Redirect(returnUrl);
         }
 
         // Detalles
-        public async Task<IActionResult> Detalles(int id)
+        public async Task<IActionResult> Detalles(int id, string returnUrl = null)
         {
             var mantenimiento = await _repo.ObtenerMantenimientoAsync(id);
             if (mantenimiento == null) return NotFound();
 
+            // Construir la returnUrl con los filtros actuales si no se proporciona
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                returnUrl = BuildReturnUrl();
+            }
+
+            ViewBag.ReturnUrl = returnUrl;
             return View(mantenimiento);
         }
 
         // Eliminar/Anular - SOLO ADMIN
         [HttpPost]
         [ValidarAdmin]
-        public async Task<IActionResult> Eliminar(int id)
+        public async Task<IActionResult> Eliminar(int id, string returnUrl = null)
         {
             try
             {
@@ -174,13 +232,19 @@ namespace ZonaDeImpacto.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("Index");
+            // Si no hay returnUrl, construir una con los filtros actuales
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                returnUrl = BuildReturnUrl();
+            }
+
+            return Redirect(returnUrl);
         }
 
         // Habilitar - SOLO ADMIN
         [HttpPost]
         [ValidarAdmin]
-        public async Task<IActionResult> Habilitar(int id)
+        public async Task<IActionResult> Habilitar(int id, string returnUrl = null)
         {
             try
             {
@@ -192,7 +256,13 @@ namespace ZonaDeImpacto.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("Index");
+            // Si no hay returnUrl, construir una con los filtros actuales
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                returnUrl = BuildReturnUrl();
+            }
+
+            return Redirect(returnUrl);
         }
 
         // Método auxiliar para cargar datos comunes
@@ -212,6 +282,39 @@ namespace ZonaDeImpacto.Controllers
             ViewBag.Rol = rol;
             ViewBag.IdUsuario = idUsuario;
             ViewBag.NombreUsuario = nombreUsuario;
+        }
+
+        // Método para construir la URL de retorno con los filtros actuales
+        private string BuildReturnUrl()
+        {
+            var queryString = HttpContext.Request.Query;
+
+            // Obtener la página actual, si existe
+            int paginaActual = 1;
+            if (queryString.ContainsKey("pagina") && int.TryParse(queryString["pagina"], out int pagina))
+            {
+                paginaActual = pagina;
+            }
+
+            // Obtener filtroVehiculo
+            int? filtroVehiculo = null;
+            if (queryString.ContainsKey("filtroVehiculo") && int.TryParse(queryString["filtroVehiculo"], out int vehiculoId))
+            {
+                filtroVehiculo = vehiculoId;
+            }
+
+            var returnUrl = Url.Action("Index", new
+            {
+                pagina = paginaActual,
+                filtroCodigo = queryString.ContainsKey("filtroCodigo") ? (string)queryString["filtroCodigo"] : null,
+                filtroVehiculo = filtroVehiculo,
+                filtroTipo = queryString.ContainsKey("filtroTipo") ? (string)queryString["filtroTipo"] : null,
+                filtroFechaDesde = queryString.ContainsKey("filtroFechaDesde") ? (string)queryString["filtroFechaDesde"] : null,
+                filtroFechaHasta = queryString.ContainsKey("filtroFechaHasta") ? (string)queryString["filtroFechaHasta"] : null,
+                filtroEstado = queryString.ContainsKey("filtroEstado") ? (string)queryString["filtroEstado"] : null
+            });
+
+            return returnUrl;
         }
     }
 }

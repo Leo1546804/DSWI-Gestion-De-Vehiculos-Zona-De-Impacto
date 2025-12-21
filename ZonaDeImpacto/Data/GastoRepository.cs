@@ -19,7 +19,7 @@ namespace ZonaDeImpacto.Data
             int tamanoPagina = 6,
             string filtroMantenimientoCodigo = null,
             int? filtroTipoGasto = null,
-            string filtroUsuario = null,
+            int? filtroUsuario = null,  // Cambiado de string a int?
             DateTime? filtroFechaDesde = null,
             DateTime? filtroFechaHasta = null,
             int? idUsuarioFiltro = null)
@@ -39,14 +39,20 @@ namespace ZonaDeImpacto.Data
                 // Parámetros de filtro
                 cmd.Parameters.AddWithValue("@filtroMantenimientoCodigo",
                     string.IsNullOrEmpty(filtroMantenimientoCodigo) ? (object)DBNull.Value : filtroMantenimientoCodigo);
+
                 cmd.Parameters.AddWithValue("@filtroTipoGasto",
                     filtroTipoGasto.HasValue ? (object)filtroTipoGasto.Value : DBNull.Value);
+
+                // CORRECCIÓN: Ahora filtroUsuario es int?
                 cmd.Parameters.AddWithValue("@filtroUsuario",
-                    string.IsNullOrEmpty(filtroUsuario) ? (object)DBNull.Value : filtroUsuario);
+                    filtroUsuario.HasValue ? (object)filtroUsuario.Value : DBNull.Value);
+
                 cmd.Parameters.AddWithValue("@filtroFechaDesde",
                     filtroFechaDesde.HasValue ? (object)filtroFechaDesde.Value : DBNull.Value);
+
                 cmd.Parameters.AddWithValue("@filtroFechaHasta",
                     filtroFechaHasta.HasValue ? (object)filtroFechaHasta.Value : DBNull.Value);
+
                 cmd.Parameters.AddWithValue("@idUsuarioFiltro",
                     idUsuarioFiltro.HasValue ? (object)idUsuarioFiltro.Value : DBNull.Value);
 
@@ -91,7 +97,7 @@ namespace ZonaDeImpacto.Data
         public async Task<List<Gasto>> ListarGastosAsync(
             string filtroMantenimientoCodigo = null,
             int? filtroTipoGasto = null,
-            string filtroUsuario = null,
+            int? filtroUsuario = null,  // Cambiado de string a int?
             DateTime? filtroFechaDesde = null,
             DateTime? filtroFechaHasta = null,
             int? idUsuarioFiltro = null)
@@ -102,7 +108,7 @@ namespace ZonaDeImpacto.Data
                 tamanoPagina: int.MaxValue,
                 filtroMantenimientoCodigo: filtroMantenimientoCodigo,
                 filtroTipoGasto: filtroTipoGasto,
-                filtroUsuario: filtroUsuario,
+                filtroUsuario: filtroUsuario,  // Ahora es int?
                 filtroFechaDesde: filtroFechaDesde,
                 filtroFechaHasta: filtroFechaHasta,
                 idUsuarioFiltro: idUsuarioFiltro);
@@ -110,9 +116,8 @@ namespace ZonaDeImpacto.Data
             return gastos;
         }
 
-
-// Obtener mantenimientos activos para dropdown
-public async Task<List<Mantenimiento>> ObtenerMantenimientosAsync()
+        // Obtener mantenimientos activos para dropdown
+        public async Task<List<Mantenimiento>> ObtenerMantenimientosAsync()
         {
             List<Mantenimiento> lista = new List<Mantenimiento>();
 
@@ -281,7 +286,8 @@ public async Task<List<Mantenimiento>> ObtenerMantenimientosAsync()
                 await cmd.ExecuteNonQueryAsync();
             }
         }
-       // para el drop de trabajador
+
+        // para el drop de trabajador
         public async Task<List<Mantenimiento>> ObtenerMantenimientosPorTrabajadorAsync(int idUsuario)
         {
             List<Mantenimiento> lista = new List<Mantenimiento>();
@@ -322,6 +328,56 @@ public async Task<List<Mantenimiento>> ObtenerMantenimientosAsync()
                 }
             }
             return lista;
+        }
+
+        // Método adicional: Obtener total de gastos para verificar funcionamiento
+        public async Task<int> ObtenerTotalGastosAsync(
+            string filtroMantenimientoCodigo = null,
+            int? filtroTipoGasto = null,
+            int? filtroUsuario = null,
+            DateTime? filtroFechaDesde = null,
+            DateTime? filtroFechaHasta = null,
+            int? idUsuarioFiltro = null)
+        {
+            int total = 0;
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.usp_ObtenerTotalGastos", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                // Parámetros de filtro
+                cmd.Parameters.AddWithValue("@filtroMantenimientoCodigo",
+                    string.IsNullOrEmpty(filtroMantenimientoCodigo) ? (object)DBNull.Value : filtroMantenimientoCodigo);
+
+                cmd.Parameters.AddWithValue("@filtroTipoGasto",
+                    filtroTipoGasto.HasValue ? (object)filtroTipoGasto.Value : DBNull.Value);
+
+                cmd.Parameters.AddWithValue("@filtroUsuario",
+                    filtroUsuario.HasValue ? (object)filtroUsuario.Value : DBNull.Value);
+
+                cmd.Parameters.AddWithValue("@filtroFechaDesde",
+                    filtroFechaDesde.HasValue ? (object)filtroFechaDesde.Value : DBNull.Value);
+
+                cmd.Parameters.AddWithValue("@filtroFechaHasta",
+                    filtroFechaHasta.HasValue ? (object)filtroFechaHasta.Value : DBNull.Value);
+
+                cmd.Parameters.AddWithValue("@idUsuarioFiltro",
+                    idUsuarioFiltro.HasValue ? (object)idUsuarioFiltro.Value : DBNull.Value);
+
+                SqlParameter totalParam = new SqlParameter("@Total", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(totalParam);
+
+                await conn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+
+                total = totalParam.Value != DBNull.Value ? (int)totalParam.Value : 0;
+            }
+
+            return total;
         }
     }
 }

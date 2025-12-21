@@ -64,6 +64,10 @@ namespace ZonaDeImpacto.Data
 
             return (lista, totalRegistros);
         }
+        public List<string> ObtenerTiposMantenimiento()
+        {
+            return new List<string> { "Preventivo", "Correctivo" };
+        }
 
         // MÉTODO CON FILTROS
         public async Task<(List<Mantenimiento> Mantenimientos, int TotalRegistros)> ListarMantenimientosPaginadoAsync(
@@ -312,12 +316,7 @@ namespace ZonaDeImpacto.Data
             }
         }
 
-        // Obtener tipos de mantenimiento para dropdown
-        public List<string> ObtenerTiposMantenimiento()
-        {
-            return new List<string> { "Preventivo", "Correctivo" };
-        }
-
+        
         // Obtener usuarios para dropdown
         public async Task<List<Usuario>> ObtenerUsuariosAsync()
         {
